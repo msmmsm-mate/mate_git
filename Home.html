@@ -1,0 +1,572 @@
+<div class="row g-3 mt-2">
+  <div class="col-12 col-lg-8 col-xl-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="row">
+          <div class="col-12">🚗 ขอเช่าใช้รถ</div>
+        </div>
+      </div>
+      <div class="card-body rounded-4">
+        <form id="addFormCars">
+          <input type="hidden" id="dataCarsKey" name="dataCarsKey">
+
+          <div class="row mt-2">
+            <div class="col-md-4">
+              <div class="mb-1">
+                <label class="control-label"> รหัสรถ <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="carsData4" name="carsData4" readonly>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-1">
+                <label class="control-label"> ประเภทการใช้งาน <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="carsData5" name="carsData5" readonly>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-1">
+                <label class="control-label"> ทะเบียนรถ <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="carsData6" name="carsData6" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-md-4">
+              <div class="mb-1">
+                <label class="control-label"> ชื่อ-สกุล ผู้เช่ารถ <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="carsData3" name="carsData3" placeholder="กรุณากรอกชื่อ-สกุล ผู้เช่าที่นี่" required autocomplete="off">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-1">
+                <label class="control-label"> เลขใบอนุญาตขับขี่ <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="carsData1" name="carsData1" placeholder="กรุณากรอกเลขใบอนุญาตขับขี่ที่นี่" required autocomplete="off">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-1">
+                <label class="control-label"> เลขประจำตัวประชาชน <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="carsData2" name="carsData2" placeholder="กรุณากรอกเลขประจำประชาชนที่นี่" required autocomplete="off">
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-md-12">
+              <div class="d-flex">
+                <div class="form-check form-switch me-3">
+                  <input class="form-check-input" type="checkbox" id="morningDayCarsSwitch" onchange="morningDayCars()">
+                  <label class="form-check-label" for="morningDayCarsSwitch">ครึ่งวันเช้า</label>
+                </div>
+                <div class="form-check form-switch me-3">
+                  <input class="form-check-input" type="checkbox" id="afternoonDayCarsSwitch" onchange="afternoonDayCars()">
+                  <label class="form-check-label" for="afternoonDayCarsSwitch">ครึ่งวันบ่าย</label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="fullDayCarsSwitch" onchange="fullDayCars()">
+                  <label class="form-check-label" for="fullDayCarsSwitch">เต็มวัน</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-md-4">
+              <div class="mb-1">
+                <label class="control-label">ตั้งแต่วันที่ <span class="text-danger">*</span></label>
+                <input type="datetime-local" class="form-control" id="carsData7" name="carsData7" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-1">
+                <label class="control-label">ถึงวันที่ <span class="text-danger">*</span></label>
+                <input type="datetime-local" class="form-control" id="carsData8" name="carsData8" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-md-4">
+              <div class="mb-1">
+                <label class="control-label">จำนวนวัน <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="carsData9" name="carsData9" readonly>
+                  <span class="input-group-text">วัน</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12 text-center">
+              <p class="fw-bold">🔒 กรุณาชำระค่ามัดจำจำนวน <span class="text-danger">1,000 บาท</span> ผ่านการสแกน QR
+                ด้านล่าง</p>
+              <img src="https://www.qrcodeinc.com/wp-content/uploads/2022/09/Scan-Do_QRCode-1024x1024.png" alt="QR Code สำหรับชำระเงิน" class="img-fluid" style="max-width: 250px;">
+              <p class="mt-2 text-muted">เมื่อชำระแล้ว กรุณากดปุ่ม "ขอเช่าใช้รถ"</p>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <label class="control-label">แนบหลักฐานการโอนเงินค่ามัดจำ (1,000 บาท) <span class="text-danger">*</span></label>
+              <input type="file" class="form-control" id="paymentProof" name="paymentProof" accept=".jpg,.jpeg,.png,.pdf" required>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <button type="submit" class="btn btn-primary me-2" onclick="submitFormCars()">ขอเช่าใช้รถ</button>
+            <button type="button" class="btn btn-secondary" onclick="clearFormCars()">ยกเลิก</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-4 col-xl-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="row g-3">
+          <div class="col-12 col-md-4 mb-2 mb-md-0">🚗 เลือกประเภทรถที่นี้</div>
+          <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end">
+            <input type="date" class="form-control me-2" style="width: auto;" id="searchDaysCars" oninput="filterDaysCars()">
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="leaveShowCarsContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  let setCarsTypes = [];
+let setDaysCars = [];
+
+const insertCarsTypes = () => {
+  google.script.run.withSuccessHandler((data) => {
+    setDaysCars = data;
+  }).getDataCar();
+
+  google.script.run.withSuccessHandler((data) => {
+    setCarsTypes = data;
+    loadCarsTypes(data);
+  }).getShowCars();
+}
+
+const loadCarsTypes = (res) => {
+  if (res.length === 0) return;
+
+  const carsContainer = document.getElementById('leaveShowCarsContainer');
+  carsContainer.innerHTML = '';
+
+  res.forEach(row => {
+    const percentage = parseInt(row[4]);
+    const status = row[7];
+    const carID = row[0];
+
+    let availability = '✅ ว่าง';
+
+    const expirationDate = row[6];
+    const [day, month, year] = expirationDate.split('/').map(Number);
+    const expireDate = new Date(year, month - 1, day);
+    const today = new Date();
+
+    let warningText = '';
+    if (today > expireDate) {
+      warningText = '❌ หมดอายุแล้ว';
+    } else {
+      let remainingMonths = expireDate.getMonth() - today.getMonth() + (12 * (expireDate.getFullYear() - today.getFullYear()));
+      if (remainingMonths <= 3) {
+        warningText = '⚠️ ใกล้หมดอายุ';
+      } else {
+        warningText = '✅ อยู่ในประกัน';
+      }
+    }
+
+    const carBookings = setDaysCars.filter(booking => booking[11] === carID);
+    const currentDate = new Date();
+
+    carBookings.forEach(booking => {
+      const startDate = new Date(booking[15]);
+      const endDate = new Date(booking[16]);
+
+      if ((currentDate >= startDate && currentDate <= endDate) &&
+          (booking[1] === 'รอตรวจสอบ' || booking[1] === 'อนุมัติ')) {
+        availability = '❌ ไม่ว่าง';
+      }
+    });
+
+    if (status === 'TRUE') {
+      const carItem = `
+        <div class="user-item-set d-flex align-items-center mb-2 ${availability === '❌ ไม่ว่าง' ? 'disabled' : ''}" 
+          onclick="selectCarsType('${row[0]}', '${row[1]}', '${row[2]}', event, '${availability}')">
+          <img src="${row[8]}" alt="${row[1]}" class="me-2" width="40" height="40">
+          <div class="car-info d-flex flex-column w-100">
+            <div class="d-flex justify-content-between align-items-center">
+              <strong>🚗 ${row[1]} </strong> (${row[2]})
+            </div>
+            <small>⚠️ เลขไมล์ล่าสุด: ${parseInt(row[3])} ${warningText}</small>
+            <small>⛽ น้ำมัน: ${percentage}%</small>
+            <small>🔍 สถานะการใช้งาน: ${availability}</small>
+            <div class="progress-Set mt-1">
+              <div class="progress-bar-Set" role="progressbar" style="width: ${percentage}%" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      carsContainer.insertAdjacentHTML('beforeend', carItem);
+    }
+  });
+};
+
+const filterDaysCars = () => {
+  const searchDate = document.getElementById('searchDaysCars').value;
+  if (!searchDate) {
+    loadCarsTypes(setCarsTypes);
+    return;
+  }
+
+  const selectedDate = new Date(searchDate);
+
+  const carsContainer = document.getElementById('leaveShowCarsContainer');
+  carsContainer.innerHTML = ''; 
+
+  setCarsTypes.forEach(row => {
+    const carID = row[0];
+    let availability = '✅ ว่าง';
+
+    const expirationDate = row[6];
+    const [day, month, year] = expirationDate.split('/').map(Number);
+    const expireDate = new Date(year, month - 1, day);
+    const today = new Date();
+
+    let warningText = '';
+    if (today > expireDate) {
+      warningText = '❌ หมดอายุแล้ว';
+    } else {
+      let remainingMonths = expireDate.getMonth() - today.getMonth() + (12 * (expireDate.getFullYear() - today.getFullYear()));
+      if (remainingMonths <= 3) {
+        warningText = '⚠️ ใกล้หมดอายุ';
+      } else {
+        warningText = '✅ อยู่ในประกัน';
+      }
+    }
+
+    const carBookings = setDaysCars.filter(booking => booking[11] === carID);
+
+    carBookings.forEach(booking => {
+      const startDate = new Date(booking[15].split("T")[0]);
+      const endDate = new Date(booking[16].split("T")[0]);
+
+      if ((selectedDate >= startDate && selectedDate <= endDate) &&
+          (booking[1] === 'รอตรวจสอบ' || booking[1] === 'อนุมัติ')) {
+        availability = '❌ ไม่ว่าง';
+      }
+    });
+
+    if (row[7] === 'TRUE') {
+      const carItem = `
+        <div class="user-item-set d-flex align-items-center mb-2 ${availability === '❌ ไม่ว่าง' ? 'disabled' : ''}" 
+          onclick="selectCarsType('${row[0]}', '${row[1]}', '${row[2]}', event, '${availability}')">
+          <img src="${row[8]}" alt="${row[1]}" class="me-2" width="40" height="40">
+          <div class="car-info d-flex flex-column w-100">
+            <div class="d-flex justify-content-between align-items-center">
+              <strong>🚗 ${row[1]} </strong> (${row[2]})
+            </div>
+            <small>⚠️ เลขไมล์ล่าสุด: ${parseInt(row[3])} ${warningText}</small>
+            <small>⛽ น้ำมัน: ${parseInt(row[4])}%</small>
+            <small>🔍 สถานะการใช้งาน: ${availability}</small>
+            <div class="progress-Set mt-1">
+              <div class="progress-bar-Set" role="progressbar" style="width: ${parseInt(row[4])}%" aria-valuenow="${parseInt(row[4])}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      carsContainer.insertAdjacentHTML('beforeend', carItem);
+    }
+  });
+};
+
+const selectCarsType = (carId, carType, carLicense, event, availability) => {
+  if (availability === '❌ ไม่ว่าง') {
+    createToast(`⚠️ รายการนี้อยู่ระหว่างการใช้งาน`, 0);
+    return;
+  }
+  document.querySelectorAll('.user-item-set').forEach(item => item.classList.remove('selected'));
+  const selectedItem = event.currentTarget;
+  selectedItem.classList.add('selected');
+  document.getElementById('carsData4').value = carId;
+  document.getElementById('carsData5').value = carType;
+  document.getElementById('carsData6').value = carLicense;
+  createToast(`✅ เลือกรายการ (${carType})`, 3);
+};
+
+const setMinDateCars = () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('carsData7').setAttribute('min', today);
+  document.getElementById('carsData8').setAttribute('min', today);
+}
+
+const fullDayCars = () => {
+  const fullDaySwitch = document.getElementById('fullDayCarsSwitch');
+  const morningSwitch = document.getElementById('morningDayCarsSwitch');
+  const afternoonSwitch = document.getElementById('afternoonDayCarsSwitch');
+  const bookingStartDate = document.getElementById('carsData7').value;
+
+  if (fullDaySwitch.checked) {
+    morningSwitch.checked = false;
+    afternoonSwitch.checked = false;
+    if (!bookingStartDate) {
+      createToast("⚠️ เกิดข้อผิดพลาด กรุณาเลือกวันที่เริ่มต้น", 3);
+      fullDaySwitch.checked = false;
+      return;
+    }
+    const startDate = new Date(bookingStartDate);
+    
+    document.getElementById('carsData7').value = startDate.toISOString().split('T')[0] + "T08:30";
+    document.getElementById('carsData8').value = startDate.toISOString().split('T')[0] + "T16:30";
+  } else {
+    document.getElementById('carsData7').value = '';
+    document.getElementById('carsData8').value = '';
+  }
+  calculateCars();
+}
+
+const morningDayCars = () => {
+  const morningSwitch = document.getElementById('morningDayCarsSwitch');
+  const afternoonSwitch = document.getElementById('afternoonDayCarsSwitch');
+  const fullDaySwitch = document.getElementById('fullDayCarsSwitch');
+  const bookingStartDate = document.getElementById('carsData7').value;
+
+  if (morningSwitch.checked) {
+    afternoonSwitch.checked = false;
+    fullDaySwitch.checked = false;
+    if (!bookingStartDate) {
+      createToast("⚠️ เกิดข้อผิดพลาด กรุณาเลือกวันที่เริ่มต้น", 3);
+      morningSwitch.checked = false;
+      return;
+    }
+    const startDate = new Date(bookingStartDate);
+
+    document.getElementById('carsData7').value = startDate.toISOString().split('T')[0] + "T08:30";
+    document.getElementById('carsData8').value = startDate.toISOString().split('T')[0] + "T12:00";
+  } else {
+    document.getElementById('carsData7').value = '';
+    document.getElementById('carsData8').value = '';
+  }
+  calculateCars();
+}
+
+const afternoonDayCars = () => {
+  const afternoonSwitch = document.getElementById('afternoonDayCarsSwitch');
+  const morningSwitch = document.getElementById('morningDayCarsSwitch');
+  const fullDaySwitch = document.getElementById('fullDayCarsSwitch');
+  const bookingStartDate = document.getElementById('carsData7').value;
+
+  if (afternoonSwitch.checked) {
+    morningSwitch.checked = false;
+    fullDaySwitch.checked = false;
+    if (!bookingStartDate) {
+      createToast("⚠️ เกิดข้อผิดพลาด กรุณาเลือกวันที่เริ่มต้น", 3);
+      afternoonSwitch.checked = false;
+      return;
+    }
+    const startDate = new Date(bookingStartDate);
+
+    document.getElementById('carsData7').value = startDate.toISOString().split('T')[0] + "T13:00";
+    document.getElementById('carsData8').value = startDate.toISOString().split('T')[0] + "T16:30";
+  } else {
+    document.getElementById('carsData7').value = '';
+    document.getElementById('carsData8').value = '';
+  }
+  calculateCars();
+}
+
+document.getElementById('carsData7').addEventListener('change', () => {
+  const fullDaySwitch = document.getElementById('fullDayCarsSwitch');
+  const morningSwitch = document.getElementById('morningDayCarsSwitch');
+  const afternoonSwitch = document.getElementById('afternoonDayCarsSwitch');
+  if (fullDaySwitch.checked) {
+    fullDayCars();
+  } else if (morningSwitch.checked) {
+    morningDayCars();
+  } else if (afternoonSwitch.checked) {
+    afternoonDayCars();
+  }
+});
+
+const calculateCars = () => {
+  const startDate = document.getElementById('carsData7').value;
+  const endDate = document.getElementById('carsData8').value;
+
+  if (startDate && endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  const diffTime = Math.abs(end - start);
+  const diffHours = diffTime / (1000 * 60 * 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  document.getElementById('carsData9').value = diffDays;
+}
+
+}
+
+document.getElementById('carsData7').addEventListener('change', calculateCars);
+document.getElementById('carsData8').addEventListener('change', calculateCars);
+
+const submitFormCars = () => {
+  event.preventDefault();
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+
+  const obj = {
+    carsKey: document.getElementById('dataCarsKey').value,
+    carsuid: document.getElementById('user-show0').innerText,
+    carsfullname: document.getElementById('user-show1').innerText,
+    carsdpm: document.getElementById('user-show2').innerText,
+    carsgroup: document.getElementById('user-show5').innerText,
+    carssig: document.getElementById('user-show4').innerText,
+    dataCars1: document.getElementById('carsData1').value,
+    dataCars2: document.getElementById('carsData2').value,
+    dataCars3: document.getElementById('carsData3').value,
+    dataCars4: document.getElementById('carsData4').value,
+    dataCars5: document.getElementById('carsData5').value,
+    dataCars6: document.getElementById('carsData6').value,
+    dataCars7: document.getElementById('carsData7').value,
+    dataCars8: document.getElementById('carsData8').value,
+    dataCars9: document.getElementById('carsData9').value
+  };
+
+  if (!obj.carsuid || !obj.carsfullname || !obj.carsdpm || !obj.carsgroup || !obj.carssig || !obj.dataCars1 || !obj.dataCars2 || !obj.dataCars3 || !obj.dataCars4 || !obj.dataCars5 || !obj.dataCars6 || !obj.dataCars7 || !obj.dataCars8 || !obj.dataCars9) {
+    createToast("⚠️ กรุณากรอกข้อมูลให้ครบถ้วน", 3);
+    $.LoadingOverlay("hide");
+    return;
+  }
+
+  google.script.run.withSuccessHandler(function(existingCars) {
+    const newStart = new Date(obj.dataCars7);
+    const newEnd = new Date(obj.dataCars8);
+    const conflictingCars = existingCars.filter(row => {
+      const existingStart = new Date(row[15]);
+      const existingEnd = new Date(row[16]);
+      return row[11] === obj.dataCars4 &&
+             row[1] !== "ยกเลิก" &&
+             row[0] !== obj.carsKey &&
+             ((newStart >= existingStart && newStart <= existingEnd) ||
+               (newEnd >= existingStart && newEnd <= existingEnd) ||
+               (newStart <= existingStart && newEnd >= existingEnd));
+    });
+
+    if (conflictingCars.length > 0) {
+      createToast("⚠️ มีการจองซ้ำ กรุณาตรวจสอบวันที่จอง", 3);
+      conflictingCars.forEach(car => {
+        const conflictStart = new Date(car[15]).toLocaleString();
+        const conflictEnd = new Date(car[16]).toLocaleString();
+        createToast(`🚗 วันที่: ${conflictStart} ถึง ${conflictEnd}`, 2);
+      });
+
+      $.LoadingOverlay("hide");
+      return;
+    }
+
+    if (!obj.carsKey) {
+      google.script.run.withSuccessHandler(function(res) {
+        $.LoadingOverlay("hide");
+        clearFormCars();
+        createToast("✅ บันทึกข้อมูลสำเร็จ", 1);
+      }).addDataCars(obj);
+    } else {
+      google.script.run.withSuccessHandler(function(res) {
+        $.LoadingOverlay("hide");
+        clearFormCars();
+        createToast("✅ แก้ไขข้อมูลสำเร็จ", 1);
+      }).upDataCars(obj);
+    }
+  }).getDataCar();
+};
+
+const editCars = (codeID) => {
+  const userRole1 = localStorage.getItem('fullname') || '';
+  const userRole2 = localStorage.getItem('level') || '';
+  const dataAllCars = dataCars.find(row => row[0] === codeID);
+  if (dataAllCars) {
+  if (dataAllCars[1] !== 'รอตรวจสอบ') {
+    createToast("⚠️ การจองนี้ไม่สามารถแก้ไขได้", 3);
+    return;
+  }
+  if ((userRole2 !== 'SuperAdmin' && userRole2 !== 'Admin' && userRole1 !== dataAllCars[4])) {
+    createToast("⚠️ คุณไม่มีสิทธิ์ในการเข้าถึงรายการนี้", 3);
+    return;
+  }
+
+  changePage(1);
+  $('#fullCarsCalendaModal').modal('hide');
+  $('#dataCarsKey').val(dataAllCars[0]);
+  $('#carsData1').val(dataAllCars[8]);
+  $('#carsData2').val(dataAllCars[9]);
+  $('#carsData3').val(dataAllCars[10]);
+  $('#carsData4').val(dataAllCars[11]);
+  $('#carsData5').val(dataAllCars[12]);
+  $('#carsData6').val(dataAllCars[13]);
+
+  const startDateTime = new Date(dataAllCars[15]);
+  const endDateTime = new Date(dataAllCars[16]);
+
+  const isMorning = (startDateTime.getHours() >= 8 && endDateTime.getHours() <= 12);
+  const isAfternoon = (startDateTime.getHours() >= 13 && endDateTime.getHours() <= 16);
+  const isFullDay = (startDateTime.getHours() === 8 && endDateTime.getHours() >= 16);
+
+  document.getElementById('morningDayCarsSwitch').checked = isMorning;
+  document.getElementById('afternoonDayCarsSwitch').checked = isAfternoon;
+  document.getElementById('fullDayCarsSwitch').checked = isFullDay;
+
+  $('#carsData7').val(dataAllCars[15]);
+  $('#carsData8').val(dataAllCars[16]);
+  $('#carsData9').val(dataAllCars[17]);
+
+  // ลบ carsData10, carsData11, carsData12 ออกแล้ว
+  calculateCars();
+}
+
+};
+
+const delCars = (codeID) => {
+  const userRole1 = localStorage.getItem('fullname') || '';
+  const userRole2 = localStorage.getItem('level') || '';
+  let dataAllCars = dataCars.find(row => row[0] === codeID);
+  if (dataAllCars) {
+    if (dataAllCars[1] !== 'รอตรวจสอบ') {
+      createToast("⚠️ การจองนี้ไม่สามารถแก้ไขได้", 3);
+      return;
+    }
+    if ((userRole2 !== 'SuperAdmin' && userRole2 !== 'Admin' && userRole1 !== dataAllCars[4])) {
+      createToast("⚠️ คุณไม่มีสิทธิ์ในการเข้าถึงรายการนี้", 3);
+      return;
+    }
+    $('#confirmBtnDel').off('click').on('click', function() {
+      $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+      $('#DelDataModal').modal('hide');
+      google.script.run.withSuccessHandler(function() {
+        dataAllCars = dataCars.filter(row => row[0] !== codeID);
+        $.LoadingOverlay("hide");
+        clearFormCars();
+        createToast("⛔ ลบข้อมูลสำเร็จ", 0);
+      }).delDataCars(codeID);
+    });
+    $('#xDelconfirmData').off('click').on('click', function() {
+      $('#DelDataModal').modal('hide');
+      $('#fullCarsCalendaModal').modal('show');
+    });
+    $('#DelDataModal').modal('show');
+    $('#fullCarsCalendaModal').modal('hide');
+  }
+}
+
+const clearFormCars = () => {
+  $('#addFormCars')[0].reset();
+  document.querySelectorAll('.user-item-set').forEach(item => item.classList.remove('selected'));
+  createToast("🔄 ล้างค่าในฟอร์มและค่าที่เลือกเรียบร้อยแล้ว", 0);
+  changePage(1)
+}
+</script>
