@@ -1,0 +1,462 @@
+<div class="py-4"> 
+<ul class="box-info">
+  <li>
+    <i class="fa-solid fa-users"></i>
+    <span class="text">
+      <p>ผู้ใช้งานระบบ</p>
+      <h3 id="countingUserA">0 <span style="font-size: 12px">(คน)</span></h3>                
+    </span>
+  </li>
+  <li>
+    <i class="fa-solid fa-user-secret"></i>
+    <span class="text">
+      <p>ผู้ดูแลระบบ</p>
+      <h3 id="countingUserB">0 <span style="font-size: 12px">(คน)</span></h3>                
+    </span>
+  </li>
+  <li>
+    <i class="fa-solid fa-user-nurse"></i>
+    <span class="text">
+      <p>ผู้จัดการระบบ</p>
+      <h3 id="countingUserC">0 <span style="font-size: 12px">(คน)</span></h3>        
+    </span>
+  </li>
+  <li>
+    <i class="fa-solid fa-user"></i>
+    <span class="text">
+      <p>ผู้ใช้งานทั่วไป</p>
+      <h3 id="countingUserD">0 <span style="font-size: 12px">(คน)</span></h3>               
+    </span>
+  </li>
+</ul>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-12 col-xl-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="row g-3">
+          <div class="col-12 col-md-4 mb-2 mb-md-0">👦 ข้อมูลผู้ใช้งาน</div>
+          <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end">
+            <select class="form-control float-sm-end me-2 mb-2 mb-md-0" style="width: auto;" onchange="updateItemsUsers(this.value)">
+              <option value="10">✅ 10</option>
+              <option value="20">✅ 25</option>
+              <option value="50">✅ 50</option>
+              <option value="100">✅ 100</option>
+              <option value="all">✅ ทั้งหมด</option>
+            </select>
+          <select id="searchUsers2" class="form-select me-2 mb-2 mb-md-0" style="width: 150px;" oninput="filterUserss()"></select>
+          <select id="searchUsers3" class="form-select me-2 mb-2 mb-md-0" style="width: 150px;" oninput="filterUserss()">
+            <option selected value="">ทั้งหมด</option>
+            <option value="SuperAdmin">SuperAdmin</option>
+            <option value="Admin">Admin</option>
+            <option value="SuperUser">SuperUser</option>
+            <option value="User">User</option>
+          </select>
+            <input type="search" class="form-control float-sm-end me-2 mb-2 mb-md-0" style="width: auto;" id="searchUsers1" placeholder="🔍ค้นหาพนักงาน..." oninput="filterUserss()">
+            <button type="button" class="btn set-button me-2 mb-2 mb-md-0" data-bs-target="#RegisterModal" data-bs-toggle="modal">ลงทะเบียน</button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body rounded-4">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col" class="text-center">#</th>
+                <th scope="col" class="text-center">UID</th>
+                <th scope="col" class="text-center">Username</th>
+                <th scope="col" class="text-center">Password</th>
+                <th scope="col" class="text-center">ชื่อผู้ใช้งาน</th>
+                <th scope="col" class="text-center">หน่วยงาน</th>
+                <th scope="col" class="text-center">ฝ่าย</th>
+                <th scope="col" class="text-center">Status</th>
+                <th scope="col" class="text-center">ProFile</th>
+                <th scope="col" class="text-center">สิทธิ์การใช้</th>
+                <th scope="col" class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="tableUsers-table"></tbody>       
+          </table>
+        </div>
+        <div class="row mt-1">
+          <div class="col-12 col-md-6 mb-2 mb-md-0 align-items-center" id="paginationUsersInfo"></div>
+          <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center">
+            <div id="paginationUsers" class="pagination"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let dataUsers = [];
+let filteredUsers = [];
+let currentUsers = 1;
+let itemsPerUsers = 10;
+
+const insertDataUsers = () => {
+  google.script.run.withSuccessHandler((data) => {
+    dataUsers = data;
+    filteredUsers = data;
+    updateCountsUsers(data);
+    renderUsers(data);
+    renderPageUsers(data.length);
+  }).getDataUsers();
+}
+
+const renderUsers = (res) => {
+  const table = document.getElementById('tableUsers-table');
+  table.innerHTML = '';
+
+  res.sort((a, b) => {
+    const numA = parseInt(a[0].replace('USER-', ''));
+    const numB = parseInt(b[0].replace('USER-', ''));
+    return numB - numA;
+  });
+
+  const startIndex = (currentUsers - 1) * itemsPerUsers;
+  const endIndex = startIndex + itemsPerUsers;
+  const emp = res.slice(startIndex, endIndex);
+
+  const startRow = startIndex + 1;
+  const endRow = startIndex + emp.length;
+  const totalRows = res.length;
+
+  document.getElementById('paginationUsersInfo').innerText = `แสดง ${startRow} ถึง ${endRow} จาก ${totalRows} แถว`;
+
+  if (emp.length === 0) {
+    const row = table.insertRow();
+    row.innerHTML = `<td colspan='9' class='fw-bold text-danger text-center p-4'><i class='fa-solid fa-circle-info text-danger'></i> ไม่พบข้อมูล! 😓</td>`;
+    return;
+  }
+
+  emp.forEach((rowIndex, index) => {
+    let dpmUserscolor = rowIndex[4];
+    let statusUserscolor = rowIndex[6];
+    let isActive = rowIndex[9] === "TRUE";
+    switch (statusUserscolor) {
+      case "SuperAdmin":
+        statusUserscolor = '<span style="color: var(--box3);font-size: 14px;"><i class="fa-solid fa-star fa-lg"></i> SuperAdmin</span>';
+        break;
+      case "Admin":
+        statusUserscolor = '<span style="color: var(--box2);font-size: 14px;"><i class="fa-solid fa-star fa-lg"></i> Admin</span>';
+        break;
+      case "SuperUser":
+        statusUserscolor = '<span style="color: var(--box1);font-size: 14px;"><i class="fa-solid fa-star fa-lg"></i> SuperUser</span>';
+        break;
+      case "User":
+        statusUserscolor = '<span style="color: var(--box4);font-size: 14px;"><i class="fa-solid fa-star fa-lg"></i> User</span>';
+        break;
+      default:
+        statusUserscolor = '<span style="color: var(--box4);font-size: 14px;"><i class="fa-solid fa-star fa-lg"></i> User</span>';
+    }
+    switch (dpmUserscolor) {
+      case "IT Management":
+        dpmUserscolor = '<span style="color: var(--box3);font-size: 14px;"><i class="fa-solid fa-circle-user fa-lg"></i> IT Management</span>';
+        break;
+      case "Manager Section":
+        dpmUserscolor = '<span style="color: var(--box2);font-size: 14px;"><i class="fa-solid fa-circle-user fa-lg"></i> Manager Section</span>';
+        break;
+      default:
+        dpmUserscolor = '<span style="color: var(--box4);font-size: 14px;"><i class="fa-solid fa-circle-user fa-lg"></i> ' + rowIndex[4] + '</span>';
+    }
+    var row = table.insertRow();
+    row.innerHTML = `
+      <td class="text-center">${startIndex + index + 1}</td>
+      <td class="text-center"><span style="font-size: 14px;">${rowIndex[0]}</span></td>
+      <td><span style="font-size: 14px;">${rowIndex[1]}</span></td>
+      <td><span style="font-size: 14px;">${rowIndex[2]}</span></td>
+      <td><span style="font-size: 14px;">${rowIndex[3]}</span></td>
+      <td><span style="font-size: 14px;">${dpmUserscolor}</span></td>
+      <td><span style="font-size: 14px;">${rowIndex[5]}</span></td>
+      <td><span style="font-size: 14px;">${statusUserscolor}</span></td>
+      <td class="text-center"><img src="${rowIndex[7]}" alt="ImageUsers" width="25"></td>
+      <td class="text-center">
+        <div class="custom-switch">
+          <input type="checkbox" ${isActive ? 'checked' : ''} id="switch-${rowIndex[0]}" class="custom-switch-input" onchange="toggleUserStatus('${rowIndex[0]}', this.checked)">
+          <label for="switch-${rowIndex[0]}" class="custom-switch-label"></label>
+        </div>
+      </td>
+      <td class="text-center"><button type='button' class='btn btn-sm me-2 edit-button' onclick='editData("${rowIndex[0]}");'><i class='fa-solid fa-pen-to-square'></i></button><button type='button' class='btn btn-sm me-2 del-button' onclick='delDataUser("${rowIndex[0]}");'><i class='fa-solid fa-trash-can'></i></button></td>
+    `;
+  });
+}
+
+const renderPageUsers = (totalItems) => {
+  const totalPages = Math.ceil(totalItems / itemsPerUsers);
+  const paginationContainer = document.getElementById('paginationUsers');
+  paginationContainer.innerHTML = '';
+  if (totalPages > 1) {
+    const createPageButton = (text, page, isDisabled = false, isActive = false) => {
+      const li = document.createElement('li');
+      li.className = `page-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}`;
+      const button = document.createElement('button');
+      button.className = 'page-link';
+      button.innerText = text;
+      button.onclick = () => {
+        if (!isDisabled) {
+          currentUsers = page;
+          renderUsers(dataUsers);
+          renderPageUsers(totalItems);
+        }
+      };
+      li.appendChild(button);
+      return li;
+    };
+    paginationContainer.appendChild(createPageButton('ย้อนกลับ', currentUsers - 1, currentUsers === 1));
+
+    if (currentUsers > 2) {
+      paginationContainer.appendChild(createPageButton(1, 1, false, currentUsers === 1));
+      if (currentUsers > 3) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+    }
+    paginationContainer.appendChild(createPageButton(currentUsers, currentUsers, false, true));
+
+    if (currentUsers < totalPages - 1) {
+      if (currentUsers < totalPages - 2) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+      paginationContainer.appendChild(createPageButton(totalPages, totalPages, false, currentUsers === totalPages));
+    }
+    paginationContainer.appendChild(createPageButton('ถัดไป', currentUsers + 1, currentUsers === totalPages));
+  }
+}
+
+const filterUserss = () => {
+  const query = document.getElementById('searchUsers1').value.toLowerCase();
+  const department = document.getElementById('searchUsers2').value;
+  const status = document.getElementById('searchUsers3').value;
+
+  const filteredUserss = dataUsers.filter(user => {
+    const matchesQuery = (
+      user[0].toLowerCase().includes(query) ||
+      user[1].toLowerCase().includes(query) ||
+      user[2].toLowerCase().includes(query) ||
+      user[3].toLowerCase().includes(query) ||
+      user[4].toLowerCase().includes(query) ||
+      user[5].toLowerCase().includes(query) ||
+      user[6].toLowerCase().includes(query)
+    );
+
+    const matchesDepartment = department === "" || user[4] === department;
+    const matchesStatus = status === "" || user[5] === status;
+
+    return matchesQuery && matchesDepartment && matchesStatus;
+  });
+
+  if (filteredUserss.length === 0) {
+    const table = document.getElementById('tableUsers-table');
+    table.innerHTML = "";
+    const noDataRow = table.insertRow();
+    const noDataCell = noDataRow.insertCell(0);
+    noDataCell.colSpan = "9";
+    noDataCell.className = 'fw-bold text-danger text-center p-4';
+    noDataCell.innerHTML = "<i class='fa-solid fa-circle-info text-danger'></i> ไม่พบข้อมูล! 😓";
+  } else {
+    currentUsers = 1;
+    renderUsers(filteredUserss);
+    renderPageUsers(filteredUserss.length);
+  }
+}
+
+const updateItemsUsers = (value) => {
+  if (value === "all") {
+    itemsPerUsers = filteredUsers.length;
+  } else {
+    itemsPerUsers = parseInt(value, 10);
+  }
+
+  currentUsers = 1;
+  renderUsers(filteredUsers);
+  renderPageUsers(filteredUsers.length);
+}
+
+
+const updateCountsUsers = (us) => {
+  const countingUserA = us.length;
+  const countingUserB = us.filter(user => user[4] === "IT Management").length;
+  const countingUserC = us.filter(user => user[4] === "Manager Section").length;
+  const countingUserD = us.filter(user => user[4] !== "IT Management" && user[4] !== "Manager Section").length;
+
+  document.getElementById('countingUserA').innerText = countingUserA;
+  document.getElementById('countingUserB').innerText = countingUserB;
+  document.getElementById('countingUserC').innerText = countingUserC;
+  document.getElementById('countingUserD').innerText = countingUserD;
+}
+
+const toggleUserStatus = (userId, isActive) => {
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+  google.script.run.withSuccessHandler(function(res) {
+    $.LoadingOverlay("hide");
+    createToast(`✅ สถานะผู้ใช้ ${isActive ? 'เปิดใช้งาน' : 'ระงับการใช้งาน'} สำเร็จ`, 1);
+    insertDataUsers();
+  }).setUserStatus(userId, isActive);
+}
+
+function password_showAdd_hide() {
+  var x = document.getElementById("registerData5");
+  var showadd_eye = document.getElementById("showadd_eye");
+  var hideadd_eye = document.getElementById("hideadd_eye");
+  hideadd_eye.classList.remove("d-none");
+  if (x.type === "password") {
+    x.type = "text";
+    showadd_eye.style.display = "none";
+    hideadd_eye.style.display = "block";
+  } else {
+    x.type = "password";
+    showadd_eye.style.display = "block";
+    hideadd_eye.style.display = "none";
+  }
+}
+
+document.addEventListener('DOMContentLoaded', (ev) => {
+  let input = document.querySelector('input[id="regictorImg"]');
+  input.addEventListener('change', (ev) => {
+      if (input.files[0].type.indexOf("image/") > -1) {
+        let img = document.getElementById('regictorPreview');
+        img.src = window.URL.createObjectURL(input.files[0]);
+      }
+  });
+});
+
+const getFormDataUsers = () => {
+  const formData = {
+    registerDataID: document.getElementById("registerDataID") ? document.getElementById("registerDataID").value : null,
+    registerData1: document.getElementById("registerData1").value,
+    registerData2: document.getElementById("registerData2").value,
+    registerData3: document.getElementById("registerData3").value,
+    registerData4: document.getElementById("registerData4").value,
+    registerData5: document.getElementById("registerData5").value,
+    registerData6: document.getElementById("registerData6").value,
+    check: $("#regictorImg").val()
+  };
+
+  if (formData.check === "") {
+    formData.profile = $("#regictorPreview").attr("src");
+  } else {
+    const imgElement = document.getElementById("regictorPreview");
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    canvas.width = imgElement.naturalWidth;
+    canvas.height = imgElement.naturalHeight;
+    context.drawImage(imgElement, 0, 0, imgElement.naturalWidth, imgElement.naturalHeight);
+    formData.imageDataUrlA = canvas.toDataURL("image/png");
+    formData.filetype = "image/png";
+    formData.filename = formData.registerData4;
+  }
+
+  return formData;
+}
+
+const submitRegisterForm = () => {
+  event.preventDefault();
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+  const formData = getFormDataUsers();
+  if (!formData.registerData4 || !formData.registerData5 || !formData.registerData3) {
+    createToast("⚠️ กรุณากรอกข้อมูลให้ครบถ้วน", 3);
+    $.LoadingOverlay("hide");
+    return;
+  }
+  if (!formData.registerDataID) {
+    google.script.run.withSuccessHandler(function(existingData) {
+      const isDuplicate = existingData.filter(row => 
+        row[1].trim() === formData.registerData4.trim()
+      );
+      if (isDuplicate.length > 0) {
+        createToast("⚠️ มีผู้ใช้งานที่ใช้ Username นี้แล้ว", 3);
+        $.LoadingOverlay("hide");
+        return;
+      }
+      google.script.run.withSuccessHandler(function(res) {
+        closeModalRegistor();
+        $.LoadingOverlay("hide");
+        insertDataUsers();
+        createToast("🧑 เพิ่มผู้ใช้งานสำเร็จ", 1);
+      }).saveUser(formData);
+    }).getDataUsers();
+  } else {
+    google.script.run.withSuccessHandler(function(res) {
+      closeModalRegistor();
+      $.LoadingOverlay("hide");
+      insertDataUsers();
+      createToast("🧑 แก้ไขผู้ใช้งานสำเร็จ", 1);
+    }).editUser(formData);
+  }
+};
+
+const editData = (userId) => {
+  const user = dataUsers.find(row => row[0] === userId);
+  if (user) {
+    $('#RegisterModal').modal('show');
+    $('#registerDataID').val(user[0]);
+    $('#registerData5').val(user[1]);
+    $('#registerData6').val(user[2]);
+    $('#registerData4').val(user[3]);
+    $('#registerData2').val(user[4]);
+    $('#registerData1').val(user[5]);
+    $('#registerData3').val(user[6]);
+    $('#regictorPreview').attr('src', user[7]);
+    //console.log(user[7]);
+    //console.log(user[8]);
+  }
+}
+
+const delDataUser = (userId) => {
+  const record = dataUsers.find(row => row[0] === userId);
+  if (record) {
+    $('#confirmBtnDel').off('click').on('click', function() {
+      $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+      $('#DelDataModal').modal('hide');
+      google.script.run.withSuccessHandler(function() {
+        dataUsers = dataUsers.filter(row => row[0] !== userId);
+        insertDataUsers();
+        $.LoadingOverlay("hide");
+        createToast("⛔ ลบข้อมูลสำเร็จ", 0);
+      }).delRecordU(userId);
+    });
+    $('#xDelconfirmData').off('click').on('click', function() {
+      $('#DelDataModal').modal('hide');
+    });
+    $('#DelDataModal').modal('show');
+  }
+}
+
+const reviewdivprofile = () => {
+  var divcontainer = document.getElementById('reviewdivprofile');
+  divcontainer.innerHTML = "";
+  var row = document.createElement('div');
+  row.className = "row row-cols-6";
+  for (let i = 1; i <= 50; i++) {
+    var image = "https://cdn.jsdelivr.net/gh/EPICCODING17/image/user-" + i + ".png";
+    var col = document.createElement('div');
+    col.className = "col p-2";
+    var img = document.createElement('img');
+    img.className = "rounded-circle w-100 imageuser"; 
+    img.src = image;
+    img.style.cursor = "pointer";
+    img.addEventListener('click', () => {
+      let imgPreview = document.getElementById('regictorPreview');
+      imgPreview.src = "https://cdn.jsdelivr.net/gh/EPICCODING17/image/user-" + i + ".png";
+    });
+    col.appendChild(img);
+    row.appendChild(col);
+  }
+  divcontainer.appendChild(row); 
+}
+
+const closeModalRegistor = () =>{
+  $('#addRegicter')[0].reset();
+  $('#regictorPreview').attr('src', 'https://img2.pic.in.th/pic/vsvds.png');
+  $('#resultMessage').hide();
+  $('#RegisterModal').modal('hide');
+}
+</script>
