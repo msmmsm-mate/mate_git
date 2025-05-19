@@ -1,0 +1,345 @@
+<div class="row g-3 mt-2">
+  <div class="col-md-8">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white">
+          <div class="row">
+            <div class="col-12 col-md-4 mb-2 mb-md-0">📂 Folder</div>
+            <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end">
+              
+            </div>
+          </div>
+        </div>
+        <div class="card-body rounded-4">
+          <div class="row mt-2">
+            <div class="col-md-6">
+              <div class="mb-1">
+                <label for="test1" class="form-label">📂 Folder Member</label>
+                <input type="text" class="form-control" id="setData1">              
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-1">
+                <label for="test1" class="form-label">📂 Folder Slide</label>
+                <input type="text" class="form-control" id="setData2">              
+              </div>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-md-6">
+              <div class="mb-1">
+                <label for="test1" class="form-label">📝 Slide Car</label>
+                <input type="text" class="form-control" id="setData3">              
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn mt-2 set-button" onclick="addSetting()">ตั้งค่าระบบ</button>
+      </div>
+    </div>
+
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white">
+          <div class="row">
+            <div class="col-12 col-md-4 mb-2 mb-md-0">💻 ฐานข้อมูลหลัก</div>
+            <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end">
+              
+            </div>
+          </div>
+        </div>
+        <div class="card-body rounded-4">
+          <div class="row mt-2">
+            <div class="col-md-6">
+              <div class="mb-1">
+                <label for="test1" class="form-label">💻 ฐานข้อมูลหลัก</label>
+                <input type="text" class="form-control" id="setData4">            
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-1">
+                <label for="test1" class="form-label">💻 ฐานข้อมูลตั้งค่าระบบ</label>
+                <input type="text" class="form-control" id="setData5">            
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn mt-2 set-button" onclick="addSetting()">ตั้งค่าระบบ</button>
+      </div>
+    </div>
+
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white">
+          <div class="row">
+            <div class="col-12 col-md-4 mb-2 mb-md-0">🏢 System</div>
+            <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end">
+              
+            </div>
+          </div>
+        </div>
+        <div class="card-body rounded-4">
+          <div class="row mt-2">
+            <div class="col-md-6">
+              <div class="mb-1">
+                <label for="test1" class="form-label">🏞️ Logo</label>
+                <input type="text" class="form-control" id="setData6">             
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-1">
+                <label for="test1" class="form-label">📝 System</label>
+                <input type="text" class="form-control" id="setData7">            
+              </div>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-md-6">
+              <div class="mb-1">
+                <label for="test1" class="form-label">📝 System</label>
+                <input type="text" class="form-control" id="setData8">              
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn mt-2 set-button" onclick="addSetting()">ตั้งค่าระบบ</button>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white">
+        <div class="row">
+          <div class="col-12 col-md-4 mb-2 mb-md-0">⚙️ ตั้งค่าสิทธิ์</div>
+          <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end">
+          </div>
+        </div>
+      </div>
+      <div class="card-body rounded-4">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col" class="text-center">#</th>
+                <th scope="col" class="text-center">เมนู</th>
+                <th scope="col" class="text-center" style="color: var(--box1)">SuperAdmin</th>
+                <th scope="col" class="text-center" style="color: var(--box2)">Admin</th>
+                <th scope="col" class="text-center" style="color: var(--box3)">SuperUser</th>
+                <th scope="col" class="text-center" style="color: var(--box4)">User</th>
+              </tr>
+            </thead>
+            <tbody id="tableMenuCars"></tbody>       
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let todoList = [];
+let currentSheet = 'Department';
+
+const loadTodos = (sheetName) => {
+  if (event) {
+    event.preventDefault();
+  }
+  currentSheet = sheetName;
+  $.LoadingOverlay("show", {image: "", fontawesome: "fa fa-spinner fa-spin"});
+  google.script.run.withSuccessHandler(function(todos) {
+    todoList = todos;
+    renderTodoList();
+    $.LoadingOverlay("hide");
+    document.getElementById('ModalDataSetting').querySelector('#dataSettingTitle').textContent = sheetName;
+    $('#ModalDataSetting').modal('show');
+  }).getTodos(sheetName);
+}
+
+const addTodoSet = () => {
+const todoInput = document.getElementById('todoInput');
+const todoText = todoInput.value.trim();
+  if (todoText) {
+    todoList.push(todoText);
+    renderTodoList();
+    todoInput.value = '';
+  }
+}
+
+const removeTodo = (index) => {
+  todoList.splice(index, 1);
+  renderTodoList();
+}
+
+const editTodo = (index) => {
+const todoTextElement = document.getElementById(`todo-text-${index}`);
+      todoTextElement.removeAttribute('readonly');
+      todoTextElement.focus();
+}
+
+const updateTodo = (index) => {
+const todoTextElement = document.getElementById(`todo-text-${index}`);
+      todoList[index] = todoTextElement.value.trim();
+      todoTextElement.setAttribute('readonly', 'readonly');
+      renderTodoList();
+}
+
+const renderTodoList = () => {
+const todoListElement = document.getElementById('todoList');
+      todoListElement.innerHTML = `
+        <li class="list-group-item header-item" style="color: var(--bs-white); font-size: 18px;">
+          <div class="d-flex justify-content-between">
+            <span>🛠️ รายการ</span>
+            <span>จัดการ</span>
+          </div>
+        </li>`;
+      todoList.forEach((todo, index) => {
+const todoItem = document.createElement('li');
+      todoItem.className = 'list-group-item todo-item';
+      todoItem.innerHTML = `
+          <input type="text" id="todo-text-${index}" value="${todo}" class="form-control me-2" readonly
+                 onblur="updateTodo(${index})" onkeypress="if(event.key === 'Enter') updateTodo(${index})">
+          <button class="btn edit-button btn-sm me-2" onclick="editTodo(${index})"><i class="fa fa-edit"></i></button>
+          <button class="btn del-button btn-sm" onclick="removeTodo(${index})"><i class="fa fa-trash"></i></button>`;
+    todoListElement.appendChild(todoItem);
+  });
+}
+
+let setMenuCars = [];
+
+const insertsetMenu = () => {
+  google.script.run.withSuccessHandler((data) => {
+    setMenuCars = data;
+    renderMenuCars(data);
+  }).getsetMenuItems();
+}
+
+const renderMenuCars = (res) => {
+  const table = document.getElementById('tableMenuCars');
+  table.innerHTML = '';
+
+  if (res.length === 0) {
+    const row = table.insertRow();
+    row.innerHTML = `<td colspan='9' class='fw-bold text-danger text-center p-4'><i class='fa-solid fa-circle-info text-danger'></i> ไม่พบข้อมูล! 😓</td>`;
+    return;
+  }
+
+  res.forEach((rowIndex, index) => {
+    var row = table.insertRow();
+    row.innerHTML = `
+      <td class="text-center">${index + 1}</td>
+      <td><span style="font-size: 14px;">${rowIndex[0]}</span></td>
+      <td class="text-center">
+        <label class="customSet-checkbox">
+            <input type="checkbox" ${rowIndex[1].toUpperCase() === "TRUE" ? "checked" : ""} onchange="updateMenuCars(${index}, 'SuperAdmin', this.checked)">
+            <span class="checkmark"><i class="fa-solid fa-check"></i><i class="fa-solid fa-xmark"></i></span>
+        </label>
+      </td>
+      <td class="text-center">
+        <label class="customSet-checkbox">
+            <input type="checkbox" ${rowIndex[2].toUpperCase() === "TRUE" ? "checked" : ""} onchange="updateMenuCars(${index}, 'Admin', this.checked)">
+            <span class="checkmark"><i class="fa-solid fa-check"></i><i class="fa-solid fa-xmark"></i></span>
+        </label>
+      </td>
+      <td class="text-center">
+        <label class="customSet-checkbox">
+            <input type="checkbox" ${rowIndex[3].toUpperCase() === "TRUE" ? "checked" : ""} onchange="updateMenuCars(${index}, 'SuperUser', this.checked)">
+            <span class="checkmark"><i class="fa-solid fa-check"></i><i class="fa-solid fa-xmark"></i></span>
+        </label>
+      </td>
+      <td class="text-center">
+        <label class="customSet-checkbox">
+            <input type="checkbox" ${rowIndex[4].toUpperCase() === "TRUE" ? "checked" : ""} onchange="updateMenuCars(${index}, 'User', this.checked)">
+            <span class="checkmark"><i class="fa-solid fa-check"></i><i class="fa-solid fa-xmark"></i></span>
+        </label>
+      </td>
+    `;
+  });
+}
+
+const updateMenuCars = (index, role, isChecked) => {
+  const roleIndex = {
+    'SuperAdmin': 1,
+    'Admin': 2,
+    'SuperUser': 3,
+    'User': 4
+  }[role];
+  setMenuCars[index][roleIndex] = isChecked ? "TRUE" : "FALSE";
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+  google.script.run.withSuccessHandler(() => {
+    $.LoadingOverlay("hide");
+    createToast("✅ บันทึกข้อมูลสำเร็จ", 1);
+    insertsetMenu();
+  }).updateMenuCarsStatus(index, role, isChecked);
+}
+
+const createToast = (message, status, delay = 1000 * 5) => {
+const toast = document.createElement('div');
+    toast.className = 'border-0';
+      toast.classList.add('toast', 'show');
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+      toast.setAttribute('aria-atomic', 'true');
+  if (status == 1) {
+    toast.style.backgroundColor = 'var(--bs-set)';
+    toast.style.color = 'var(--bs-white)';
+  } else if (status == 0) {
+    toast.style.backgroundColor = 'var(--bs-del)';
+    toast.style.color = 'var(--bs-white)';
+  } else if (status == 2) {
+    toast.style.backgroundColor = 'var(--bs-upload)';
+    toast.style.color = 'var(--bs-white)';
+  } else if (status == 3) {
+    toast.style.backgroundColor = 'var(--bs-edit)';
+    toast.style.color = 'var(--bs-white)';
+  } else if (status == 4) {
+    toast.style.backgroundColor = 'var(--bs-exclamation)';
+    toast.style.color = 'var(--bs-white)';
+  }
+
+const header = document.createElement('div');
+      header.classList.add('toast-header', 'rounded-bottom-0');
+
+const img = document.createElement('img');
+      img.src = 'https://e1.pngegg.com/pngimages/98/854/png-clipart-voiture-location-de-voitures-location-logo-tour-operateur-tourisme-vacances-client.png'; 
+      img.classList.add('rounded', 'me-2');
+      img.style.width = '20px';
+      img.alt = '...';
+
+const strong = document.createElement('strong');
+      strong.classList.add('me-auto');
+      strong.innerText = 'Car | ระบบขอใช้รถส่วนกลาง';
+
+const small = document.createElement('small');
+      small.classList.add('text-body-secondary');
+let secondsElapsed = 0;
+      small.innerText = `ตอนนี้`;
+
+const interval = setInterval(() => {
+      secondsElapsed += 1;
+      small.innerText = `${secondsElapsed} วินาทีที่แล้ว`;
+}, 1000);
+
+const button = document.createElement('button');
+      button.type = 'button';
+      button.classList.add('btn-close');
+      button.setAttribute('data-bs-dismiss', 'toast');
+      button.setAttribute('aria-label', 'Close');
+      button.onclick = () => {
+      toast.remove();
+      clearInterval(interval);
+    };
+
+      header.append(img, strong, small, button);
+
+const body = document.createElement('div');
+      body.classList.add('toast-body');
+      body.style.fontSize = '14px';
+      body.innerText = message;
+
+      toast.append(header, body);
+
+document.getElementById('toast-container').appendChild(toast);
+
+setTimeout(() => {
+  toast.classList.remove('show');
+  toast.addEventListener('transitionend', () => {
+  toast.remove();
+  clearInterval(interval);
+    });
+  }, delay);
+};
+</script>
