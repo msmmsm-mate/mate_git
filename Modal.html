@@ -1,0 +1,307 @@
+<div class="modal fade" id="RegisterModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="RegisterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-5">
+      <div class="modal-body p-4">
+        <div class="text-center mb-2">
+          <h5 class="mb-0 fw-bold mt-2" id="textAddregis1">👦 เพิ่มข้อมูลผู้ใช้งาน</h5>
+          <h5 class="mb-0 fw-bold mt-2" id="textAddregis2" style="display:none">👦 แก้ไขข้อมูลผู้ใช้งาน</h5>
+        </div>
+        <form id="addRegicter">
+          <input type="text" class="form-control" id="registerDataID" name="registerDataID" hidden>
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center justify-content-center">
+                  <div style="width: 150px; height: 150px; overflow: hidden; border-radius: 50%; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border:3px solid white;" class="mb-3">
+                    <img id="regictorPreview" src="https://img2.pic.in.th/pic/vsvds.png" alt="รูปประจำตัว" style="width: 100%; height: 100%; object-fit: cover;">
+                  </div>
+                  <input type="file" name="regictorImg" id="regictorImg" style="display:none">
+                </div>
+                <div class="mb-3">
+                  <label class="control-label">หน่วยงาน <span class="text-danger">*</span></label>
+                  <select class="form-select" id="registerData1" name="registerData1" required></select>
+                </div>
+                <div class="mb-3">
+                  <label class="control-label">ฝ่าย <span class="text-danger">*</span></label>
+                  <select class="form-select" id="registerData2" name="registerData2" required></select>
+                </div>
+                <div class="mb-3">
+                  <label class="control-label">ระดับผู้ใช้งาน <span class="text-danger">*</span></label>
+                  <select class="form-select" id="registerData3" name="registerData3" required>
+                    <option selected value="">กรุณาเลือกรายการ</option>
+                    <option value="SuperAdmin">SuperAdmin</option>
+                    <option value="Admin">Admin</option>
+                    <option value="SuperUser">SuperUser</option>
+                    <option value="User">User</option>
+                    <option value="Driver">Driver</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="control-label">ชื่อผู้ใช้งาน <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="registerData4" name="registerData4" placeholder="กรุณากรอกชื่อผู้ใช้งาน" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Username <span class="text-danger me-2">*</span><span id="resultMessage"></span></label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="registerData5" name="registerData5" placeholder="กรุณากรอก Username" onkeyup="checkDuplicate()" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Password <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="registerData6" name="registerData6" placeholder="กรุณากรอก Password" required>
+                  <button class="btn set-button" type="button" onclick="password_showAdd_hide()">
+                    <i class="fa-regular fa-eye" id="showadd_eye"></i>
+                    <i class="fa-regular fa-eye-slash d-none" id="hideadd_eye"></i>
+                  </button>
+                  </div>
+                </div>
+        <div class="mt-2 text-center">
+          <button type="submit" class="btn set-button" id="addusers1" onclick="submitRegisterForm()">บันทึกข้อมูล</button>
+          <button type="button" class="btn del-button" onclick="closeModalRegistor()" data-bs-dismiss="modal">ยกเลิก</button>
+        </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-2">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                <label for="regictorImg" class="btn edit-button w-100">อัพโหลดรูปคลิกที่นี่</label>
+                </div>
+                <div id="reviewdivprofile"></div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img id="imageModalSrc" src="" alt="Full Size Image" style="width: 100%; height: auto;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="ShowCarsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-5">
+      <div class="modal-body p-4">
+        <h5 class="mb-0 fw-medium  text-center mb-2 mt-2" style="color: var(--box1);">📝 ฟอร์มรถ</h5>
+          <form id="formShowCars" onsubmit="submitShowCars(this)">
+            <input type="text" class="form-control" id="dataShowCarsKey" name="dataShowCarsKey" hidden>
+            <div class="row mt-2">
+              <div class="col-md-6 d-flex justify-content-center align-items-center">
+                  <label for="regisImgShowCars" style="width: 150px; height: 150px; overflow: hidden; border-radius: 10%; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border:5px solid white;" class="mb-3">
+                    <img id="regisImgShowCarsPreview" src="https://img2.pic.in.th/pic/vsvds.png" alt="รูปประจำตัว" style="width: 100%; height: 100%; display:; object-fit: cover;">
+                    <input type="file" id="regisImgShowCars" name="myregisImgShowCars" style="display: none;">
+                  </label>                
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-1">
+                    <label class="control-label">ประเภทรถ <span class="text-danger">*</span></label>
+                    <select class="form-select" id="dataShowCars1" name="dataShowCars1"></select>
+                  </div>
+                  <div class="mb-1">
+                    <label class="control-label">หมายเลขทะเบียน <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control " id="dataShowCars2" name="dataShowCars2" placeholder="กรุณากรอกหมายเลขทะเบียนที่นี่">
+                  </div> 
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-md-6">
+                  <div class="mb-1">
+                    <label class="control-label">เลขไมล์ล่าสุด <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control " id="dataShowCars3" name="dataShowCars3" placeholder="กรุณากรอกเลขไมล์ล่าสุดที่นี่">
+                  </div>     
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-1">
+                    <label class="control-label">จำนวนน้ำมัน <span class="text-danger">*</span></label>
+                      <select class="form-control" id="dataShowCars4" name="dataShowCars4" placeholder="กรุณากรอกจำนวนน้ำมันที่นี่">
+                        <option value="10" selected>⛽ 10%</option>
+                        <option value="20">⛽ 20%</option>
+                        <option value="30">⛽ 30%</option>
+                        <option value="40">⛽ 40%</option>
+                        <option value="50">⛽ 50%</option>
+                        <option value="60">⛽ 60%</option>
+                        <option value="70">⛽ 70%</option>
+                        <option value="80">⛽ 80%</option>
+                        <option value="90">⛽ 90%</option>
+                        <option value="100">⛽ 100%</option>
+                      </select>
+                  </div>     
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-md-6">
+                  <div class="mb-1">
+                    <label class="control-label">วันที่เริ่ม <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control " id="dataShowCars5" name="dataShowCars5">
+                  </div>     
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-1">
+                    <label class="control-label">วันที่สิ้นสุด <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control " id="dataShowCars6" name="dataShowCars6">
+                  </div>     
+                </div>
+              </div>
+          <div class="mt-2 text-end">
+            <button type="submit" class="btn set-button">บันทึกข้อมูล</button>
+            <button type="button" class="btn del-button" onclick="closeDataShowCars()" data-bs-dismiss="modal">ยกเลิก</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="fullCarsCalendaModal" tabindex="-1" aria-labelledby="fullCarsCalendaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-5">
+      <div class="modal-body p-4">
+        <h5 class="mb-0 fw-medium text-center mb-2 mt-2" style="color: var(--box1);">🚗 ปฏิทินการเช่าใช้รถ</h5>
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="d-flex align-items-center">
+              <h5 class="mb-0" style="color: var(--box3);font-weight: bold;" id="detailCars0"></h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-center mb-3">
+            <div>
+
+              <div>สถานะ : <small style="font-weight: bold;font-size: 14px;" id="detailCars1"></small> วันที่ขอ : <small style="font-weight: bold;font-size: 14px;" id="detailCars2"></small> </div>
+              <div>UID : <small style="font-weight: bold;font-size: 14px;" id="detailCars3"></small> ชื่อผู้ขอ : <small style="font-weight: bold;font-size: 14px;" id="detailCars4"></small></div>
+              <div>ฝ่าย : <small style="font-weight: bold;font-size: 14px;" id="detailCars5"></small> กลุ่มงาน : <small style="font-weight: bold;font-size: 14px;" id="detailCars6"></small></div>
+              <div>รถเช่าส่วนกลาง : <small style="font-weight: bold;font-size: 14px;" id="detailCars10"></small> <small style="font-weight: bold;font-size: 14px;" id="detailCars11"></small> <small style="font-weight: bold;font-size: 14px;" id="detailCars12"></small></div>
+              <div>สถานที่ : <small style="font-weight: bold;font-size: 14px;" id="detailCars7"></small> <small style="font-weight: bold;font-size: 14px;" id="detailCars8"></small> <small style="font-weight: bold;font-size: 14px;" id="detailCars9"></small></div>
+              <div>พนักงานขับรถ : <small style="font-weight: bold;font-size: 14px;" id="detailCars14"></small></div>
+              <div>จำนวนคน : <small style="font-weight: bold;font-size: 14px;" id="detailCars13"></small></div>
+              <div>ตั้งแต่วันที่ : <small style="font-weight: bold;font-size: 14px;" id="detailCarsStar"></small></div>
+              <div>ถึงวันที่ : <small style="font-weight: bold;font-size: 14px;" id="detailCarsEnd"></small></div>
+            </div>
+          </div>
+          <div class="text-end mt-2">
+            <button type="submit" class="btn set-button me-1" onclick="editCars($('#detailCars0').text())">แก้ไขข้อมูล</button>
+            <button type="submit" class="btn edit-button me-1" onclick="delCars($('#detailCars0').text())">ลบข้อมูล</button>
+            <button type="button" class="btn del-button" data-bs-dismiss="modal">ยกเลิก</button>
+          </div>   
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="ApproveCarsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-5">
+      <div class="modal-body p-4">
+        <h5 class="mb-0 fw-medium text-center mt-2 mb-2" style="color: var(--box1);">🚗 อัปเดตการเช่ารถ</h5>
+        <div id="APDataCars"></div>
+        <hr>
+        <div class="row mt-2">
+          <div class="col-md-12">
+            <div class="mb-1">
+              <label class="control-label">เลือกรายการ <span class="text-danger">*</span></label>
+              <select type="text" class="form-control"  id="approveDataCars1" name="approveDataCars1" style="color: var(--box3);"></select>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-md-12">
+            <div class="mb-1">
+              <label class="control-label"> เลือกพนักงานขับรถ <span class="text-danger">*</span></label>
+              <div class="mb-1" style="display: flex; align-items: center;">
+                <input type="text" class="form-control me-2" id="approveDataCars2" name="approveDataCars2" placeholder="กรุณาเลือกพนักงานขับรถที่นี่">
+                <button type="button" class="btn set-button" id="searchDriver" onclick="openSearchDriverModal()"><i class="fa-solid fa-magnifying-glass"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="text-center mt-2">
+          <button type="button" class="btn set-button" onclick="submitAPCars()">ยืนยัน</button>
+          <button type="button" class="btn del-button" onclick="closeAPCars()" data-bs-dismiss="modal">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="sendCarModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-5">
+      <div class="modal-body p-4">
+        <h5 class="mb-0 fw-medium text-center mt-2 mb-2" style="color: var(--box1);"id="carModalLabel">🚗 การดำเนินการรถ</h5>
+        <div class="row mt-2">
+          <div id="startMileSection" class="mb-3">
+            <label for="sendCarstartMile" class="form-label">เลขไมล์ขาไป</label>
+            <input type="number" class="form-control" id="sendCarstartMile" placeholder="กรอกเลขไมล์ขาไป">
+          </div>
+          <div id="returnMileSection" class="mb-3">
+            <label for="sendCarreturnMile" class="form-label">เลขไมล์ขากลับ</label>
+            <input type="number" class="form-control" id="sendCarreturnMile" placeholder="กรอกเลขไมล์ขากลับ">
+          </div>
+          <div id="fuelSection" class="mb-3">
+            <label for="sendCarfuelAmount" class="form-label">น้ำมันคงเหลือ</label>
+            <select class="form-control" id="sendCarfuelAmount" placeholder="กรุณากรอกจำนวนน้ำมันที่นี่">
+              <option value="10" selected>⛽ 10%</option>
+              <option value="20">⛽ 20%</option>
+              <option value="30">⛽ 30%</option>
+              <option value="40">⛽ 40%</option>
+              <option value="50">⛽ 50%</option>
+              <option value="60">⛽ 60%</option>
+              <option value="70">⛽ 70%</option>
+              <option value="80">⛽ 80%</option>
+              <option value="90">⛽ 90%</option>
+              <option value="100">⛽ 100%</option>
+            </select>
+          </div>
+        </div>
+        <div class="text-center mt-2">
+          <button type="button" class="btn set-button" onclick="submitSendCars()">ยืนยัน</button>
+          <button type="button" class="btn del-button" onclick="closeSendCars()" data-bs-dismiss="modal">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="searchDriverModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-5">
+      <div class="modal-body p-4">
+        <h5 class="mb-0 fw-medium text-center mt-2 mb-2" style="color: var(--box1);">🔍 ค้นหาพนักงานขับรถ</h5>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col" class="text-center">ลำดับ</th>
+                <th scope="col" class="text-center">ภาพ</th>
+                <th scope="col" class="text-center">UID</th>
+                <th scope="col" class="text-center">ชื่อ</th>
+                <th scope="col" class="text-center">หน่วยงาน</th>
+                <th scope="col" class="text-center">สถานะ</th>
+                <th scope="col" class="text-center">เลือก</th>
+              </tr>
+            </thead>
+            <tbody id="TableDriverBody"></tbody>       
+          </table>
+        </div>
+        <div class="text-end mt-2">
+          <button type="button" class="btn del-button" onclick="closeSearchDriverModal()" data-bs-dismiss="modal">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img id="imageModalSrc" src="" alt="Full Size Image" style="width: 100%; height: auto;">
+      </div>
+    </div>
+  </div>
+</div>
