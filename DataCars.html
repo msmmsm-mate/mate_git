@@ -1,0 +1,646 @@
+<div class="row g-3 mt-2">
+  <div class="col-12 col-lg-8 col-xl-8">
+    <div class="card border-0 shadow-sm mb-2">
+      <div class="card-body rounded-4">
+        <ul class="nav nav-underline nav-fill">
+          <li class="nav-item">
+            <a class="nav-link custom-nav-link" href="#" style="color: var(--box1);font-size: 14px;"
+              onclick="filterCarsStatus('รอตรวจสอบ')">⌛ รอตรวจสอบ
+              <span class="badge set-button" id="countsStatusCarsA">0</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link custom-nav-link" href="#" style="color: var(--box4);font-size: 14px;"
+              onclick="filterCarsStatus('ไม่อนุมัติ')">❌ ไม่อนุมัติ
+              <span class="badge del-button" id="countsStatusCarsD">0</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link custom-nav-link" href="#" style="color: var(--box4);font-size: 14px;"
+              onclick="filterCarsStatus('ยกเลิก')">❌ ยกเลิก
+              <span class="badge del-button" id="countsStatusCarsB">0</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link custom-nav-link" href="#" style="color: var(--box2);font-size: 14px;"
+              onclick="filterCarsStatus('อนุมัติ')">✅ อนุมัติ
+              <span class="badge upload-button" id="countsStatusCarsC">0</span></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="row g-3">
+          <div class="col-12 col-md-4 mb-2 mb-md-0">✅ รายการใช้รถเช่า</div>
+          <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end">
+            <input type="search" class="form-control float-sm-end me-2 mb-2 mb-md-0" style="width: auto;" id="searchCars" placeholder="🔍ค้นหาข้อมูล..." oninput="filterCars()">
+          </div>
+        </div>
+      </div>
+      <div class="card-body rounded-4">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col" class="text-center">#</th>
+                <th scope="col" class="text-center">ชื่อผู้ระบบขอเช่ารถ</th>
+                <th scope="col" class="text-center">ประเภทรถ</th>
+                <th scope="col" class="text-center">ข้อมูลผู้เช่ารถ</th>
+                <th scope="col" class="text-center">วันที่</th>
+                <th scope="col" class="text-center">ใบใช้รถ</th>
+                <th scope="col" class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="tableDataCars"></tbody>
+          </table>
+        </div>
+        <div class="row mt-1">
+          <div class="col-12 col-md-6 mb-2 mb-md-0 align-items-center" id="paginationCarsInfo"></div>
+          <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center">
+            <div id="paginationCars" class="pagination"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-4 col-xl-4">
+    <div class="card border-0 shadow-sm mb-2">
+      <div class="card-header bg-white">
+        <div class="row">
+          <div class="col-12 col-md-12 mb-2 mb-md-0">📅 ตารางรถช่า</div>
+        </div>
+      </div>
+      <div class="card-body rounded-4">
+        <div id="calendarCars"></div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="row g-3">
+          <div class="col-12 col-md-12 mb-2 mb-md-0">💹 กราฟใช้รถเช่า</div>
+        </div>
+      </div>
+      <div class="card-body rounded-4">
+        <div id="chartCars" style="width: 100%; height: 350px;"></div>
+        <div id="carsSummary"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const parseDate = (dateString) => {
+  return new Date(dateString);
+};
+
+let dataCars = [];
+let filteredCars = [];
+let selectedCars = {};
+let filterPageCars = '';
+let currentCars = 1;
+let itemsPerCars = 10;
+
+const insertDataCars = (initialStatus = '') => {
+  google.script.run.withSuccessHandler((data) => {
+    dataCars = data;
+    filterPageCars = initialStatus;
+    filteredCars = filterPageCars ? data.filter(item => item[1] === filterPageCars) : data;
+    currentCars = 1;
+    renderCars(filteredCars);
+    renderPageCars(filteredCars.length);
+    countsStatusCars(data);
+  }).getDataCar();
+}
+
+const renderCars = (res) => {
+  const table = document.getElementById('tableDataCars');
+  table.innerHTML = '';
+
+  res.sort((a, b) => parseDate(b[15]) - parseDate(a[15]));
+
+  const userRole1 = localStorage.getItem('fullname') || '';
+  const userRole2 = localStorage.getItem('level') || '';
+
+  const startIndex = (currentCars - 1) * itemsPerCars;
+  const endIndex = startIndex + itemsPerCars;
+  const ca = res.slice(startIndex, endIndex);
+
+  const startRow = startIndex + 1;
+  const endRow = startIndex + ca.length;
+  const totalRows = res.length;
+
+  document.getElementById('paginationCarsInfo').innerText = `แสดง ${startRow} ถึง ${endRow} จาก ${totalRows} แถว`;
+
+  if (ca.length === 0) {
+    const row = table.insertRow();
+    row.innerHTML = `<td colspan='8' class='fw-bold text-danger text-center p-4'><i class='fa-solid fa-circle-info text-danger'></i> ไม่พบข้อมูล! 😓</td>`;
+    return;
+  }
+
+  ca.forEach((rowIndex, index) => {
+    let status = rowIndex[1];
+    let actionStatus;
+    let pdfLink = rowIndex[27];
+    let pdfButton;
+    if (userRole2 === 'SuperAdmin' || userRole2 === 'Admin' || userRole1 === rowIndex[4]) {
+        if (pdfLink) {
+          pdfButton = `<a href="${pdfLink}" target="_blank" class="btn btn-sm me-2 set-button"><i class="fa-solid fa-download"></i> ดาวน์โหลด</a>`;
+        } else {
+          pdfButton = `<button class="btn btn-sm me-2 del-button">❌ ไฟล์</button>`;
+        }
+      } else {
+        pdfButton = `<button class="btn btn-sm me-2 del-button" onclick="createToast('⚠️ คุณไม่มีสิทธิ์ในการเข้าถึงรายการนี้', 3)">❌ สิทธิ์</button>`;
+      }
+    switch (status) {
+      case "รอตรวจสอบ":
+        status = `<span style="color: var(--box1);font-size: 14px;">⌛ ${rowIndex[1]}</span>`;
+        actionStatus = `<button type='button' class='btn btn-sm me-2 upload-button' onclick='showModalCars("${rowIndex[0]}");'>อัปเดต</button>`;
+        break;
+      case "อนุมัติ":
+        status = `<span style="color: var(--box2);font-size: 14px;">✅ ${rowIndex[1]}</span>`;
+        actionStatus = `<button type='button' class='btn btn-sm me-2 upload-button' onclick='showModalCars("${rowIndex[0]}");'>อัปเดต</button>`;
+        break;
+      case "ยกเลิก":
+        status = `<span style="color: var(--box4);font-size: 14px;">❌ ${rowIndex[1]}</span>`;
+        actionStatus = `<button type='button' class='btn btn-sm me-2 upload-button' onclick='showModalCars("${rowIndex[0]}");'>อัปเดต</button>`;
+        break;
+      default:
+        status = `<span style="color: var(--box4);font-size: 14px;">❌ ${rowIndex[1]}</span>`;
+        actionStatus = `<button type='button' class='btn btn-sm me-2 upload-button' onclick='showModalCars("${rowIndex[0]}");'>อัปเดต</button>`;
+    }
+
+    let user = dataUsers.find(user => user[0] === rowIndex[3]);
+    let userImage = user ? user[7] : 'https://e1.pngegg.com/pngimages/98/854/png-clipart-voiture-location-de-voitures-location-logo-tour-operateur-tourisme-vacances-client.png';
+
+    let car = dataShowCars.find(car => car[0] === rowIndex[11]);
+    let carImage = car ? car[8] : 'https://e1.pngegg.com/pngimages/98/854/png-clipart-voiture-location-de-voitures-location-logo-tour-operateur-tourisme-vacances-client.png';
+
+    var row = table.insertRow();
+    row.innerHTML = `
+      <td class="text-center"><span style="font-size: 14px;">${startIndex + index + 1}</span></td>
+      <td>
+        <div style="display: flex; align-items: center;">
+          <img src="${userImage}" alt="ImageUsers" width="30" style="margin-right: 10px;">
+          <div style="font-size: 14px;">
+            <span>🙋ชื่อ: ${rowIndex[4]}</span><br>
+            <span>ฝ่าย: ${rowIndex[6]}</span><br>
+            <span>หน่วยงาน: ${rowIndex[5]}</span><br>
+            <span>วันที่แจ้ง: ${rowIndex[2]}</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display: flex; align-items: center;">
+          <img src="${carImage}" alt="ImageUsers" width="30" style="margin-right: 10px;">
+          <div style="font-size: 14px;">
+            <span>${status}</span><br>
+            <span>KeyCar: ${rowIndex[11]}</span><br>
+            <span>ประเภท: ${rowIndex[12]}</span><br>
+            <span>เลขทะเบียนรถ: ${rowIndex[13]}</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span style="font-size: 14px;">🏝️ชื่อ-สกุล: ${rowIndex[10]}</span><br>
+        <span style="font-size: 14px;">เลขบัตรประชาชน: ${rowIndex[8]}</span><br>
+        <span style="font-size: 14px;">เลขใบอนุญาตขับขี่: ${rowIndex[9]}</span>
+      </td>
+      <td>
+        <span style="font-size: 14px;">🗓️วันที่เริ่ม: ${rowIndex[15]}</span><br>
+        <span style="font-size: 14px;">🗓️วันที่สิ้นสุด: ${rowIndex[16]}</span><br>
+      </td>
+      <td class="text-center">${pdfButton}</td>
+      <td class="text-center">${actionStatus}</td>
+    `;
+  });
+}
+
+const renderPageCars = (totalItems) => {
+  const totalPages = Math.ceil(totalItems / itemsPerCars);
+  const paginationContainer = document.getElementById('paginationCars');
+  paginationContainer.innerHTML = '';
+  if (totalPages > 1) {
+    const createPageButton = (text, page, isDisabled = false, isActive = false) => {
+      const li = document.createElement('li');
+      li.className = `page-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}`;
+      const button = document.createElement('button');
+      button.className = 'page-link';
+      button.innerText = text;
+      button.onclick = () => {
+        if (!isDisabled) {
+          currentCars = page;
+          renderCars(filteredCars);
+          renderPageCars(totalItems);
+        }
+      };
+      li.appendChild(button);
+      return li;
+    };
+    paginationContainer.appendChild(createPageButton('ย้อนกลับ', currentCars - 1, currentCars === 1));
+
+    if (currentCars > 2) {
+      paginationContainer.appendChild(createPageButton(1, 1, false, currentCars === 1));
+      if (currentCars > 3) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+    }
+    paginationContainer.appendChild(createPageButton(currentCars, currentCars, false, true));
+
+    if (currentCars < totalPages - 1) {
+      if (currentCars < totalPages - 2) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+      paginationContainer.appendChild(createPageButton(totalPages, totalPages, false, currentCars === totalPages));
+    }
+    paginationContainer.appendChild(createPageButton('ถัดไป', currentCars + 1, currentCars === totalPages));
+  }
+}
+
+const filterCars = () => {
+  const query = document.getElementById('searchCars').value.toLowerCase();
+  filteredCars = dataCars.filter(row => {
+    return row.some(column => column.toLowerCase().includes(query));
+  });
+
+  currentCars = 1;
+  renderCars(filteredCars);
+  renderPageCars(filteredCars.length);
+}
+
+const filterCarsStatus = (status) => {
+  const userRole = localStorage.getItem('level') || '';
+  if ((userRole !== 'SuperAdmin' && userRole !== 'Admin') && (status === 'รอตรวจสอบ' || status === 'ยกเลิก' || status === 'อนุมัติ')) {
+    createToast("⚠️ คุณไม่มีสิทธิ์ในการเข้าถึงสถานะนี้", 3);
+    return;
+  }
+
+  filterPageCars = status;
+  filteredCars = status ? dataCars.filter(item => item[1] === status) : dataCars;
+  currentCars = 1;
+  renderCars(filteredCars);
+  renderPageCars(filteredCars.length);
+}
+
+const countsStatusCars = (data) => {
+  const countsStatusCarsA = data.filter(row => row[1] === "รอตรวจสอบ").length;
+  const countsStatusCarsB = data.filter(row => row[1] === "ยกเลิก").length;
+  const countsStatusCarsC = data.filter(row => row[1] === "อนุมัติ").length;
+  const countsStatusCarsD = data.filter(row => row[1] === "ไม่อนุมัติ").length;
+  document.getElementById('countsStatusCarsA').innerText = countsStatusCarsA;
+  document.getElementById('countsStatusCarsB').innerText = countsStatusCarsB;
+  document.getElementById('countsStatusCarsC').innerText = countsStatusCarsC;
+  document.getElementById('countsStatusCarsD').innerText = countsStatusCarsD;
+}
+
+let calendarCars = null;
+const showcalendarCars = () => {
+  if (calendarCars) {
+    google.script.run.withSuccessHandler(function(data) {
+      calendarCars.removeAllEvents();
+      calendarCars.addEventSource(data);
+    }).getCalendarCars();
+  } else {
+    google.script.run.withSuccessHandler(function(data) {
+      let calendarEl = document.getElementById('calendarCars');
+      
+      calendarCars = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        nowIndicator: true,
+        headerToolbar: {
+          left: 'prev,next today dayGridMonth',
+          center: '',
+          right: 'title'
+        },
+        navLinks: true, 
+        editable: false,
+        droppable: false,
+        selectable: true,
+        selectMirror: true,
+        dayMaxEvents: true,
+        locale: 'th',
+        buttonText: {
+          today: 'วันนี้',
+          month: 'เดือน',
+          week: 'สัปดาห์',
+          day: 'วัน',
+          list: 'กำหนดการ',  
+        },
+        events: data, 
+        eventClick: function(info) {
+          detailCarsCalendar(info.event.extendedProps.idevent);
+        },
+        eventDidMount: function(info) {
+          let status = info.event.extendedProps.status;
+          let backgroundColor;
+
+          switch(status) {
+            case 'อนุมัติ':
+              backgroundColor = 'var(--box2)';
+              break;
+            case 'รอตรวจสอบ':
+              backgroundColor = 'var(--box3)';
+              break;
+            case 'ยกเลิก':
+              backgroundColor = 'var(--box4)';
+              break;
+            default:
+              backgroundColor = 'var(--box2)';
+          }
+
+          if (info.el) {
+            info.el.style.backgroundColor = backgroundColor;
+            info.el.style.color = 'var(--bs-white)';
+
+            const startDate = new Date(info.event.start);
+            const endDate = new Date(info.event.end);
+            const formattedStartDate = formatThaiDateTime(startDate);
+            const formattedEndDate = formatThaiDateTime(endDate);
+
+            let tooltipContent = `
+              <strong>🆔</strong><small>${info.event.extendedProps.idevent}</small><br>
+              <strong>📝</strong><small>สถานะ : ${info.event.extendedProps.status}</small>
+              <strong>📝</strong><small>UID : ${info.event.extendedProps.uid}  ชื่อผู้จอง : ${info.event.extendedProps.name}</small>
+              <strong>📝</strong><small>ฝ่าย : ${info.event.extendedProps.group} หน่วยงาน : ${info.event.extendedProps.dpm}</small><br>
+              <strong>🚗</strong><small>รถเช่า : ${info.event.extendedProps.cars4} ${info.event.extendedProps.cars5} ${info.event.extendedProps.cars6}</small><br>
+              <strong>🏝️</strong><small>ชื่อ-สกุล : ${info.event.extendedProps.cars3} เลขบัตรประชาชน : ${info.event.extendedProps.cars1} เลขใบอนุญาตขับขี่ : ${info.event.extendedProps.cars2}</small><br>
+              <strong>📅</strong><small>ตั้งแต่ : ${formattedStartDate} ถึง : ${formattedEndDate}</small><br>
+            `;
+            info.el.setAttribute('data-bs-toggle', 'tooltip');
+            info.el.setAttribute('data-bs-html', 'true');
+            info.el.setAttribute('title', tooltipContent);
+            info.el.setAttribute('data-bs-custom-class', 'custom-tooltip');
+
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+              return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            info.el.addEventListener('mouseover', function() {
+              info.el.style.backgroundColor = 'var(--box1)';
+              info.el.style.transform = 'scale(1.1)';
+            });
+            info.el.addEventListener('mouseout', function() {
+              info.el.style.backgroundColor = backgroundColor;
+              info.el.style.transform = 'scale(1)';
+            });
+          }
+        },
+        eventContent: function(info) {
+          let cars6 = info.event.extendedProps.cars6 || '';
+          return {
+            html: `<strong>📝</strong><small> ${cars6}</small>`
+          };
+        },
+      });
+      calendarCars.render();
+    }).getCalendarCars();
+  }
+}
+
+const detailCarsCalendar = (codeID) => {
+  const userRole1 = localStorage.getItem('fullname') || '';
+  const userRole2 = localStorage.getItem('level') || '';
+  const dataAllCars = dataCars.filter(r => r[0] == codeID);
+    if ((userRole2 !== 'SuperAdmin' && userRole2 !== 'Admin' && userRole1 !== dataAllCars[4])) {
+      createToast("⚠️ คุณไม่มีสิทธิ์ในการเข้าถึงรายการนี้", 3);
+      return;
+    }
+  const startDate = new Date(dataAllCars[0][15]);
+  const endDate = new Date(dataAllCars[0][16]);
+  $("#detailCarsStar").html(formatThaiDateTime(startDate));  
+  $("#detailCarsEnd").html(formatThaiDateTime(endDate)); 
+
+  $('#fullCarsCalendaModal').modal('show');
+  $("#detailCars0").html(dataAllCars[0][0]);
+
+  let status = '';
+
+  if (dataAllCars[0][1] === "รอตรวจสอบ") {
+    status = "<span style='color: var(--box3);font-size: 14px;'>⏳ รอตรวจสอบ</span>";
+  } else if (dataAllCars[0][1] === "อนุมัติ"){
+    status = "<span style='color: var(--box2);font-size: 14px;'>✅ อนุมัติ</span>";
+  } else if (dataAllCars[0][1] === "ยกเลิก") {
+    status = "<span style='color: var(--box4);font-size: 14px;'>❌ ยกเลิก</span>";
+  }
+
+  $("#detailCars1").html(status);
+  $("#detailCars2").html(dataAllCars[0][2]);
+  $("#detailCars3").html(dataAllCars[0][3]);
+  $("#detailCars4").html(dataAllCars[0][4]);
+  $("#detailCars5").html(dataAllCars[0][5]);
+  $("#detailCars6").html(dataAllCars[0][6]);
+  $("#detailCars7").html(dataAllCars[0][8]);
+  $("#detailCars8").html(dataAllCars[0][9]);
+  $("#detailCars9").html(dataAllCars[0][10]);
+}
+
+const showModalCars = (codeID) => {
+  const userRole = localStorage.getItem('level') || '';
+  if ((userRole !== 'SuperAdmin' && userRole !== 'Admin')) {
+    createToast("⚠️ คุณไม่มีสิทธิ์ในการเข้าถึงรายการนี้", 3);
+    return;
+  }
+  const row = dataCars.find(row => row[0] === codeID);
+  $('#ApproveCarsModal').modal('show');
+  selectedCars = row;
+  if (row) {
+    $('#approveDataCars1').val(row[1]);
+    $('#approveDataCars2').val(row[14]);
+    const startDate = new Date(row[15]);
+    const endDate = new Date(row[16]);
+    const modalContent = `
+      <div style="font-size: 16px;"><strong>วันที่แจ้ง:</strong> ${row[2]}</div>
+      <div style="font-size: 16px;"><strong>UID:</strong> ${row[3]} <strong>ชื่อผู้ขอใช้:</strong> ${row[4]}</div>
+      <div style="font-size: 16px;"><strong>หน่วยงาน:</strong> ${row[5]} <strong>ฝ่าย:</strong> ${row[6]}</div>
+      <div style="font-size: 16px;"><strong>รถเช่า:</strong> ${row[11]} ${row[12]} ${row[13]}</div>
+      <div style="font-size: 16px;"><strong>ประเภทรถที่เช่า:</strong> ${row[10]} <strong>ข้อมูลผู้เช่ารถ:</strong> ${row[8]} ${row[9]}</div>
+      <div style="font-size: 16px;"><strong>วันที่แจ้ง:</strong> ${row[2]}</div>
+      <div style="font-size: 16px;"><strong>วันและเวลาเริ่มต้น:</strong> ${formatThaiDateTime(startDate)}</div>
+      <div style="font-size: 16px;"><strong>วันและเวลาสิ้นสุด:</strong> ${formatThaiDateTime(endDate)}</div>
+      
+    `;
+    document.getElementById('APDataCars').innerHTML = modalContent;
+  }
+}
+
+let dataDriver = [];
+const openSearchDriverModal = () => {
+  $('#ApproveCarsModal').modal('hide');
+  google.script.run.withSuccessHandler((data) => {
+    dataDriver = data;
+    filterDriver();
+  }).getDataUsers();
+  $('#searchDriverModal').modal('show');
+}
+
+const closeSearchDriverModal = () => {
+  $('#searchDriverModal').modal('hide');
+  $('#ApproveCarsModal').modal('show');
+}
+
+const filterDriver = () => {
+  const searchValue = document.getElementById('searchDriver').value.toLowerCase();
+  const filteredDrivers = dataDriver.filter(user => user[6] === 'Driver' && user[3].toLowerCase().includes(searchValue));
+  const tableBody = document.getElementById('TableDriverBody');
+  tableBody.innerHTML = '';
+
+  if (filteredDrivers.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan='7' class='fw-bold text-danger text-center p-4'>
+          <i class='fa-solid fa-circle-info text-danger'></i> ไม่พบข้อมูล! 😓
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  filteredDrivers.forEach((user, index) => {
+    const row = `
+      <tr>
+        <td class="text-center"><span style="font-size: 14px;">${index + 1}</span></td>
+        <td class="text-center"><img src="${user[7]}" width="30" height="30" alt="${user[3]}"></td>
+        <td class="text-center"><span style="font-size: 14px;">${user[0]}</span></td>
+        <td class="text-center"><span style="font-size: 14px;">${user[3]}</span></td>
+        <td class="text-center"><span style="font-size: 14px;">${user[5]}</span></td>
+        <td class="text-center"><span style="font-size: 14px;">${user[6]}</span></td>
+        <td class="text-center">
+          <button class="btn set-button btn-sm" onclick="selectDriver('${user[3]}')">เลือก</button>
+        </td>
+      </tr>
+    `;
+    tableBody.insertAdjacentHTML('beforeend', row);
+  });
+}
+
+const selectDriver = (driverName) => {
+  document.getElementById('approveDataCars2').value = driverName;
+  closeSearchDriverModal();
+};
+
+const submitAPCars = () => {
+  const carsdata1 = document.getElementById('approveDataCars1').value;
+  const carsdata2 = document.getElementById('approveDataCars2').value;
+  const carsdataname = document.getElementById('user-show1').innerText;
+  const carsdatasig = document.getElementById('user-show4').innerText;
+  if (!carsdata1) {
+    createToast("❌ กรุณากรอกข้อมูลให้ครบถ้วน", 0);
+    return;
+  }
+  const data = {
+    codeID: selectedCars[0],
+    carsdataname: carsdataname,
+    carsdatasig: carsdatasig,
+    carsdata1: carsdata1,
+    carsdata2: carsdata2
+  };
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+  google.script.run.withSuccessHandler((res) => {
+  $.LoadingOverlay("hide");
+    $('#ApproveCarsModal').modal('hide');
+    createToast("✅ บันทึกข้อมูลสำเร็จ", 1);
+    insertDataCars(filterPageCars);
+    closeAPCars();
+  }).addAPDataCars(data);
+}
+
+const closeAPCars = () => {
+  document.getElementById('approveDataCars1').value = '';
+  document.getElementById('approveDataCars2').value = '';
+}
+
+const formatThaiDateTime = (date) => {
+  const thaiMonths = [
+      'มกราคม',
+      'กุมภาพันธ์',
+      'มีนาคม',
+      'เมษายน',
+      'พฤษภาคม',
+      'มิถุนายน',
+      'กรกฎาคม',
+      'สิงหาคม',
+      'กันยายน',
+      'ตุลาคม',
+      'พฤศจิกายน',
+      'ธันวาคม'
+  ];
+
+  const thaiMonth = thaiMonths[date.getMonth()];
+  const thaiYear = date.getFullYear() + 543; 
+  const thaiDate = `${date.getDate()} ${thaiMonth} ${thaiYear}`;
+  const thaiTime = date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  return `${thaiDate} เวลา ${thaiTime} น.`;
+}
+
+
+if (!window.calendar_languages) {
+    window.calendar_languages = {};
+  }
+
+window.calendar_languages['th-TH'] = {
+  error_noview: 'ปฏิทิน: ไม่พบ View {0}',
+  error_dateformat: 'ปฏิทิน: รูปแบบวันที่ไม่ถูกต้อง {0}. ควรจะเป็นค่า "now" หรือ "yyyy-mm-dd"',
+  error_loadurl: 'ปฏิทิน: URL ของเหตุการณ์ไม่ได้ตั้งค่าไว้',
+  error_where: 'ปฏิทิน: เกิดข้อผิดพลาด {0}. สามารถเป็นได้แค่ค่า "ถัดไป" หรือ "ก่อนหน้า" หรือ "วันนี้" เท่านั้น',
+  error_timedevide: 'ปฏิทิน:  Time split parameter ควรนำไปหาร 60 ลงตัวเท่านั้น. อย่างเช่น 10, 15, 30',
+  
+  no_events_in_day: 'วันนี้ไม่มีเหตุการณ์ใดๆ',
+  
+  title_year: '{0}',
+  title_month: '{0} {1}',
+  title_week: 'สัปดาห์ที่ {0} ของปี {1}',
+  title_day: '{0} {1} {2}, {3}',
+  
+  week: 'สัปดาห์ที่ {0}',
+  all_day: 'ทุกวัน',
+  time: 'เวลา',
+  events: 'เหตุการณ์',
+  before_time: 'เริ่มก่อน Timeline',
+  after_time: 'เริ่มหลัง Timeline',
+  
+  m0: 'มกราคม',
+  m1: 'กุมภาพันธ์',
+  m2: 'มีนาคม',
+  m3: 'เมษายน',
+  m4: 'พฤษภาคม',
+  m5: 'มิถุนายน',
+  m6: 'กรกฎาคม',
+  m7: 'สิงหาคม',
+  m8: 'กันยายน',
+  m9: 'ตุลาคม',
+  m10: 'พฤศจิกายน',
+  m11: 'ธันวาคม',
+  
+  ms0: 'ม.ค.',
+  ms1: 'ก.พ.',
+  ms2: 'มี.ค.',
+  ms3: 'เม.ย.',
+  ms4: 'พ.ค.',
+  ms5: 'มิ.ย.',
+  ms6: 'ก.ค.',
+  ms7: 'ส.ค.',
+  ms8: 'ก.ย.',
+  ms9: 'ต.ค.',
+  ms10: 'พ.ย.',
+  ms11: 'ธ.ค.',
+  
+  d0: 'อาทิตย์',
+  d1: 'จันทร์',
+  d2: 'อังคาร',
+  d3: 'พุธ',
+  d4: 'พฤหัสบดี',
+  d5: 'ศุกร์',
+  d6: 'เสาร์',
+  
+  first_day: 1,
+  week_numbers_iso_8601: true,
+  holidays: {
+  }
+};
+</script>
