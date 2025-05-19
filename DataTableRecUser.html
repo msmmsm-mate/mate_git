@@ -1,0 +1,159 @@
+<div class="row g-3 mt-2">
+  <div class="col-12 col-lg-12 col-xl-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="row g-3">
+          <div class="col-12 col-md-4 mb-2 mb-md-0">💻 ประวัติการเข้าใช้งาน</div>
+          <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end">
+            <input type="search" class="form-control float-sm-end me-2 mb-2 mb-md-0" style="width: auto;" id="searchRecUsers" placeholder="🔍ค้นหาผู้ใช้งาน..." oninput="filterRecUsers()">
+          </div>
+        </div>
+      </div>
+      <div class="card-body rounded-4">
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th scope="col" class="text-center">#</th>
+            <th scope="col" class="text-center">ชื่อผู้ใช้งาน</th>
+            <th scope="col" class="text-center">IP Address</th>
+            <th scope="col" class="text-center">สถานที่</th>
+            <th scope="col" class="text-center">วันที่</th>
+            <th scope="col" class="text-center">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody id="tableRecUsers-table"></tbody>       
+      </table>
+    </div>
+      <div class="row">
+        <div class="col-12 col-md-6 mb-md-0 align-items-center" id="paginationRecUsersInfo"></div>
+        <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center">
+          <div id="paginationRecUsers" class="pagination"></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>  
+</div>
+
+<script>
+let dataRecUsers = [];
+let filteredRecUsers = [];
+let currentRecUsers = 1;
+let itemsPerRecUsers = 10;
+
+const insertDataRecUsers = () => {
+  google.script.run.withSuccessHandler((data) => {
+    dataRecUsers = data;
+    filteredRecUsers = data;
+    renderRecUsers(data);
+    renderPageRecUsers(data.length);
+  }).getUserLog();
+}
+
+const renderRecUsers = (res) => {
+  const table = document.getElementById('tableRecUsers-table');
+  table.innerHTML = '';
+
+  const startIndex = (currentRecUsers - 1) * itemsPerRecUsers;
+  const endIndex = startIndex + itemsPerRecUsers;
+  const rec = res.slice(startIndex, endIndex);
+
+  const startRow = startIndex + 1;
+  const endRow = startIndex + rec.length;
+  const totalRows = res.length;
+
+  document.getElementById('paginationRecUsersInfo').innerText = `แสดง ${startRow} ถึง ${endRow} จาก ${totalRows} แถว`;
+
+  if (rec.length === 0) {
+    const row = table.insertRow();
+    row.innerHTML = `<td colspan='6' class='fw-bold text-danger text-center p-4'><i class='fa-solid fa-circle-info text-danger'></i> ไม่พบข้อมูล! 😓</td>`;
+    return;
+  }
+
+  rec.forEach((rowIndex, index) => {
+    let statusrecuser = rowIndex[4];
+    switch (statusrecuser) {
+      case "เข้าสู่ระบบ":
+        statusrecuser = '<span style="color: var(--box1);font-size: 14px;"><i class="fa-solid fa-circle-right fa-lg"></i> เข้าสู่ระบบ</span>';
+        break;
+      case "ออกจากระบบ":
+        statusrecuser = '<span style="color: var(--box4);font-size: 14px;"><i class="fa-solid fa-circle-left fa-lg"></i> ออกจากระบบ</span>';
+        break;
+      default:
+        statusrecuser = '<span style="color: var(--box4);font-size: 14px;"><i class="fa-solid fa-circle-user fa-lg"></i> ' + rowIndex[4] + '</span>';
+    }
+
+    let user = dataUsers.find(user => user[1] === rowIndex[0]);
+    let userImage = user ? user[7] : 'https://e1.pngegg.com/pngimages/98/854/png-clipart-voiture-location-de-voitures-location-logo-tour-operateur-tourisme-vacances-client.png';
+
+    let row = table.insertRow();
+    row.innerHTML = `
+      <td class="text-center">${startIndex + index + 1}</td>
+      <td><img src="${userImage}" alt="ImageUsers" width="25"> <span style="font-size: 14px;">${rowIndex[0]}</span></td>
+      <td><span style="font-size: 14px;">${rowIndex[1]}</span></td>
+      <td><span style="font-size: 14px;">${rowIndex[2]}</span></td>
+      <td><span style="font-size: 14px;">${rowIndex[3]}</span></td>
+      <td><span style="font-size: 14px;">${statusrecuser}</span></td>
+    `;
+  });
+}
+
+const renderPageRecUsers = (totalItems) => {
+  const totalPages = Math.ceil(totalItems / itemsPerRecUsers);
+  const paginationContainer = document.getElementById('paginationRecUsers');
+  paginationContainer.innerHTML = '';
+  if (totalPages > 1) {
+    const createPageButton = (text, page, isDisabled = false, isActive = false) => {
+      const li = document.createElement('li');
+      li.className = `page-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}`;
+      const button = document.createElement('button');
+      button.className = 'page-link';
+      button.innerText = text;
+      button.onclick = () => {
+        if (!isDisabled) {
+          currentRecUsers = page;
+          renderRecUsers(dataRecUsers);
+          renderPageRecUsers(totalItems);
+        }
+      };
+      li.appendChild(button);
+      return li;
+    };
+    paginationContainer.appendChild(createPageButton('ย้อนกลับ', currentRecUsers - 1, currentRecUsers === 1));
+
+    if (currentRecUsers > 2) {
+      paginationContainer.appendChild(createPageButton(1, 1, false, currentRecUsers === 1));
+      if (currentRecUsers > 3) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+    }
+    paginationContainer.appendChild(createPageButton(currentRecUsers, currentRecUsers, false, true));
+
+    if (currentRecUsers < totalPages - 1) {
+      if (currentRecUsers < totalPages - 2) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+      paginationContainer.appendChild(createPageButton(totalPages, totalPages, false, currentRecUsers === totalPages));
+    }
+    paginationContainer.appendChild(createPageButton('ถัดไป', currentRecUsers + 1, currentRecUsers === totalPages));
+  }
+}
+
+const filterRecUsers = () => {
+  const query = document.getElementById('searchRecUsers').value.toLowerCase();
+  filteredRecUsers = dataRecUsers.filter(row => {
+    return row.some(column => column.toLowerCase().includes(query));
+  });
+
+  currentRecUsers = 1;
+  renderRecUsers(filteredRecUsers);
+  renderPageRecUsers(filteredRecUsers.length);
+}
+</script>
