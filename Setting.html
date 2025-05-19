@@ -1,0 +1,70 @@
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+  <div id="toast-container" class="toast-container position-fixed"></div>
+</div>
+
+<div class="modal fade" id="logoutModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content rounded-5">
+      <div class="modal-body p-4 text-center">
+        <h1><i class="bx bxs-error-circle bx-tada bx-lg" style="color: #FC3B56;"></i></h1>
+        <h2 class="mb-0 fw-bold mt-2">ออกจากระบบ!</h2>
+        <h5 class="mb-0 fw-light fs-6 opacity-50 mt-2">คุณต้องการออกจากระบบหรือไม่ ?</h5>
+        <div class="mt-2">
+        <button type="button" class="btn set-button" data-bs-dismiss="modal" onclick="logoutUsers()">ออกจากระบบ</button>
+        <button type="button" class="btn del-button" id="xlogoutModal" data-bs-dismiss="modal">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="DelDataModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="DelDataModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content rounded-5">
+      <div class="modal-body p-4 text-center">
+        <h1><i class="bx bxs-error-circle bx-tada bx-lg" style="color: #ffc107;"></i></h1>
+        <h3 class="mb-0 fw-bold mt-2">คุณยืนยันหรือไม่!</h3>
+        <h5 class="mb-0 fw-light fs-6 opacity-50 mt-2">คุณต้องการลบรายการนี้หรือไม่ ?</h5>
+        <div class="mt-2">
+        <button type="button" class="btn set-button" id="confirmBtnDel">ใช่, ต้องการ</button>
+        <button type="button" class="btn del-button" id="xDelconfirmData" data-bs-dismiss="modal">ยกเลิก</button>
+        </div>
+      </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addTokenModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addTokenModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content rounded-5">
+      <div class="modal-body p-4 text-center">
+        <h3 class="mb-0 fw-bold mt-2">รับกาารแจ้งเตือนในLineสำเร็จ</h3>
+        <h5 class="mb-0 fw-light fs-6 opacity-50 mt-2">คุณสามารถปิดแท็บBrowserนีได้เลย</h5>
+        <div class="text-center mt-2">
+          <button type="button" class="btn set-button" onclick="closeWindow()">ตกลง</button>
+        </div>
+      </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="ModalDataSetting" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-5">
+        <div class="modal-body p-4 text-center">
+          <h5 class="mb-0 fw-medium text-center mt-2" style="color: var(--box1);">📝 ตั้งค่าระบบ <span id="dataSettingTitle" style="font-size: 14px; color: var(--box4);"></span></h5>
+          <div class="todo-container">
+          <div class="input-group mt-2 mb-2">
+            <input type="text" id="todoInput" class="form-control" placeholder="กรุณากรอกข้อมูล">
+            <button class="btn edit-button" type="button" onclick="addTodoSet()">เพิ่ม</button>
+          </div>
+            <ul class="list-group todo-list" id="todoList"></ul>
+          </div>
+          <div class="mt-2">
+            <button type="button" class="btn set-button" onclick="saveTodosSet()">บันทึกข้อมูล</button>
+            <button type="button" class="btn del-button" data-bs-dismiss="modal">ยกเลิก</button>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
