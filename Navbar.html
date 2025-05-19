@@ -1,0 +1,60 @@
+<nav class="px-3 py-2 bg-white rounded shadow-sm">
+  <i class="ri-menu-line sidebar-toggle me-3 d-block d-md-none"></i>
+  <h5 class="text-gradient fw-bold mb-0 me-auto" id="nameSystem"></h5>
+  <div class="profile dropdown">
+    <div class="d-flex align-items-center cursor-pointer dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      <img class="navbar-profile-image" src="https://e1.pngegg.com/pngimages/98/854/png-clipart-voiture-location-de-voitures-location-logo-tour-operateur-tourisme-vacances-client.png" id="picadmin1" alt="Image">
+    </div>
+        <div class="dropdown-menu rounded-4" aria-labelledby="notificationDropdown" style="width: 340px; max-height: 600px;">
+          <div class="d-flex align-items-center justify-content-between px-3 mt-2">
+            <h6 class="mb-0 fs-6">โปรไฟล์ผู้ใช้งาน</h6>
+          </div>
+          <div class="dropdown-content">
+            <div class="d-flex align-items-center py-3 mx-3 border-bottom">
+              <img src="https://cdn.jsdelivr.net/gh/JacketJK/image/user-1.png" class="rounded-circle profile-user" alt="" id="picadmin2">
+              <div class="ms-3">
+                <h6 class="mb-0 d-flex align-items-center"><i class="fa-solid fa-address-card"></i>&nbsp;<strong class="mb-0 d-block text-body-dark" id="user-show1">Epic Coding</strong></h6>
+                <span class="mb-0 d-flex align-items-center d-block text-body-secondary"><i class="fa-solid fa-building-user"></i>&nbsp;<strong class="mb-0 d-block text-body-secondary" id="user-show2">Epic Coding</strong></span>
+                <span class="mb-0 d-flex align-items-center d-block text-body-secondary"><i class="fa-solid fa-face-smile"></i>&nbsp;<strong class="mb-0 d-block text-body-secondary" id="user-show3">Epic Coding</strong></span>
+                <span id="user-show0" style="display:none"></span>
+                <span id="user-show4" style="display:none"></span>
+                <span id="user-show5" style="display:none"></span>
+              </div>
+            </div>
+            <div class="message-body" role="button">
+              <div class="py-2 px-3 d-flex align-items-center dropdown-item" data-bs-target="#NewProfileModal" data-bs-toggle="modal">
+                <span class="me-3 bg-secondary bg-opacity-25 rounded-3">
+                  <i class="fa-solid fa-circle-user fa-2xl"></i>
+                </span>
+                <div class="w-75 d-inline-block v-middle">
+                  <h6 class="mb-0 fw-semibold lh-base limited-text">เปลี่ยนรูปโปรไฟล์</h6>
+                </div>
+              </div>                 
+            </div>
+            <div class="message-body" role="button">
+              <div class="py-2 px-3 d-flex align-items-center dropdown-item" data-bs-toggle="modal" data-bs-target="#userChangePwModal">
+                <span class="me-3 bg-secondary bg-opacity-25 rounded-3">
+                  <i class="fa-solid fa-pen-to-square fa-2xl"></i>
+                </span>
+                <div class="w-75 d-inline-block v-middle">
+                  <h6 class="mb-0 fw-semibold lh-base limited-text">เปลี่ยนรหัสผ่าน</h6>
+                </div>
+              </div>                 
+            </div>
+            <div class="message-body" role="button">
+              <div class="py-2 px-3 d-flex align-items-center dropdown-item" data-bs-toggle="modal" data-bs-target="#NewSigModal">
+                <span class="me-3 bg-secondary bg-opacity-25 rounded-3">
+                  <i class="fa-solid fa-signature fa-2xl"></i>
+                </span>
+                <div class="w-75 d-inline-block v-middle">
+                  <h6 class="mb-0 fw-semibold lh-base limited-text">เปลี่ยนลายเซ็น</h6>
+                </div>
+              </div>                 
+            </div>
+          </div>
+          <div class="py-2 px-4">
+            <button class="btn del-button w-100" data-bs-target="#logoutModal" data-bs-toggle="modal"><i class="fa-solid fa-power-off"></i> ออกจากระบบ</button>
+          </div>
+        </div>
+  </div>
+</nav>
