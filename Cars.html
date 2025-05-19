@@ -1,0 +1,311 @@
+<div class="row g-3 mt-2">
+  <div class="col-12 col-lg-12 col-xl-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="row g-3">
+          <div class="col-12 col-md-4 mb-2 mb-md-0">🚗 จัดการข้อมูลรถ</div>
+          <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end">
+            <select class="form-control float-sm-end me-2 mb-2 mb-md-0" style="width: auto;" onchange="updateItemsShowCars(this.value)">
+              <option value="10">✅ 10</option>
+              <option value="20">✅ 25</option>
+              <option value="50">✅ 50</option>
+              <option value="100">✅ 100</option>
+              <option value="all">✅ ทั้งหมด</option>
+            </select>
+            <input type="search" class="form-control float-sm-end me-2 mb-2 mb-md-0" style="width: 200px;" id="searchShowCars" placeholder="🔍ค้นหาข้อมูล..." oninput="filterShowCars()">
+            <button type="button" class="btn set-button mb-2 mb-md-0" data-bs-target="#ShowCarsModal" data-bs-toggle="modal">เพิ่มรถ</button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body rounded-4">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col" class="text-center">ID</th>
+                <th scope="col" class="text-center">รูปภาพ</th>
+                <th scope="col" class="text-center">ประเภทรถ</th>
+                <th scope="col" class="text-center">หมายเลขทะเบียน</th>
+                <th scope="col" class="text-center">เลขไมล์ล่าสุด</th>
+                <th scope="col" class="text-center">น้ำมัน</th>
+                <th scope="col" class="text-center">ประกัน</th>
+                <th scope="col" class="text-center">สถานะ</th>
+                <th scope="col" class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="tableShowCars"></tbody>       
+          </table>
+        </div>
+        <div class="row mt-1">
+          <div class="col-12 col-md-6 mb-2 mb-md-0 align-items-center">
+            <div id="paginationShowCarsInfo"></div>
+          </div>
+          <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center">
+            <div id="paginationShowCars" class="pagination"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let dataShowCars = [];
+let filteredShowCars = [];
+let currentShowCars = 1;
+let itemsPerShowCars = 10;
+
+const insertShowCars = () => {
+  google.script.run.withSuccessHandler((data) => {
+    dataShowCars = data;
+    filteredShowCars = data;
+    renderShowCars(data);
+    renderPageShowCars(data.length);
+  }).getShowCars();
+}
+
+const renderShowCars = (res) => {
+  const table = document.getElementById('tableShowCars');
+  table.innerHTML = '';
+
+  res.sort((a, b) => {
+    const numA = parseInt(a[0].replace('CAR', ''));
+    const numB = parseInt(b[0].replace('CAR', ''));
+    return numB - numA;
+  });
+
+  const startIndex = (currentShowCars - 1) * itemsPerShowCars;
+  const endIndex = startIndex + itemsPerShowCars;
+  const cars = res.slice(startIndex, endIndex);
+
+  const startRow = startIndex + 1;
+  const endRow = startIndex + cars.length;
+  const totalRows = res.length;
+
+  document.getElementById('paginationShowCarsInfo').innerText = `แสดง ${startRow} ถึง ${endRow} จาก ${totalRows} แถว`;
+
+  if (cars.length === 0) {
+    const row = table.insertRow();
+    row.innerHTML = `<td colspan='9' class='fw-bold text-danger text-center p-4'><i class='fa-solid fa-circle-info text-danger'></i> ไม่พบข้อมูล! 😓</td>`;
+    return;
+  }
+
+  cars.forEach((rowIndex) => {
+    const expirationDate = rowIndex[6];
+    const [day, month, year] = expirationDate.split('/').map(Number);
+    const expireDate = new Date(year, month - 1, day);
+    const today = new Date();
+
+    let remainingText;
+    let warningText = '';
+    if (today > expireDate) {
+      remainingText = '❌ หมดอายุแล้ว';
+    } else {
+      let remainingMonths = expireDate.getMonth() - today.getMonth() + (12 * (expireDate.getFullYear() - today.getFullYear()));
+      let remainingDays = expireDate.getDate() - today.getDate();
+
+      if (remainingDays < 0) {
+        remainingMonths -= 1;
+        const previousMonth = new Date(expireDate.getFullYear(), expireDate.getMonth(), 0);
+        remainingDays += previousMonth.getDate();
+      }
+
+      if (remainingMonths <= 3) {
+        warningText = '⚠️ ใกล้หมดอายุ ';
+      }
+
+      remainingText = `${remainingMonths} เดือน ${remainingDays} วัน`;
+    }
+
+    let isActive = rowIndex[7] === "TRUE";
+    var row = table.insertRow();
+    row.innerHTML = `
+      <td class="text-center"><span style="font-size: 14px;font-weight:bold;">${rowIndex[0]}</span></td>
+      <td class="text-center"><img src="${rowIndex[8]}" alt="ImageUsers" width="30" onclick="openimageModal('${rowIndex[6]}')"></td>
+      <td><span style="font-size: 14px;">${rowIndex[1]}</span></td>
+      <td><span style="font-size: 14px;">${rowIndex[2]}</span></td>
+      <td class="text-center"><span style="font-size: 14px;">⚠️ ${rowIndex[3]} กิโลเมตร</span></td>
+      <td class="text-center"><span style="font-size: 14px;">⛽ ${rowIndex[4]}%</span></td>
+      <td class="text-center"><span style="font-size: 14px;">${warningText}${remainingText}</span></td>
+      <td class="text-center">
+        <div class="custom-switch">
+          <input type="checkbox" ${isActive ? 'checked' : ''} id="switch-${rowIndex[0]}" class="custom-switch-input" onchange="toggleCarsStatus('${rowIndex[0]}', this.checked)">
+          <label for="switch-${rowIndex[0]}" class="custom-switch-label"></label>
+        </div>
+      </td>
+      <td class="text-center"><button type='button' class='btn btn-sm me-2 edit-button' onclick='editShowCars("${rowIndex[0]}");'><i class='fa-solid fa-pen-to-square'></i></button><button type='button' class='btn btn-sm me-2 del-button' onclick='delShowCars("${rowIndex[0]}");'><i class='fa-solid fa-trash-can'></i></button></td>
+    `;
+  });
+};
+
+const renderPageShowCars = (totalItems) => {
+  const totalPages = Math.ceil(totalItems / itemsPerShowCars);
+  const paginationContainer = document.getElementById('paginationShowCars');
+  paginationContainer.innerHTML = '';
+  if (totalPages > 1) {
+    const createPageButton = (text, page, isDisabled = false, isActive = false) => {
+      const li = document.createElement('li');
+      li.className = `page-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}`;
+      const button = document.createElement('button');
+      button.className = 'page-link';
+      button.innerText = text;
+      button.onclick = () => {
+        if (!isDisabled) {
+          currentShowCars = page;
+          renderShowCars(dataShowCars);
+          renderPageShowCars(totalItems);
+        }
+      };
+      li.appendChild(button);
+      return li;
+    };
+    paginationContainer.appendChild(createPageButton('ย้อนกลับ', currentShowCars - 1, currentShowCars === 1));
+
+    if (currentShowCars > 2) {
+      paginationContainer.appendChild(createPageButton(1, 1, false, currentShowCars === 1));
+      if (currentShowCars > 3) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+    }
+    paginationContainer.appendChild(createPageButton(currentShowCars, currentShowCars, false, true));
+
+    if (currentShowCars < totalPages - 1) {
+      if (currentShowCars < totalPages - 2) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+      paginationContainer.appendChild(createPageButton(totalPages, totalPages, false, currentShowCars === totalPages));
+    }
+    paginationContainer.appendChild(createPageButton('ถัดไป', currentShowCars + 1, currentShowCars === totalPages));
+  }
+}
+
+const filterShowCars = () => {
+  const query = document.getElementById('searchShowCars').value.toLowerCase();
+  filteredShowCars = dataShowCars.filter(row => {
+    return (row.some(column => column.toLowerCase().includes(query)));
+  });
+
+  currentShowCars = 1;
+  renderShowCars(filteredShowCars);
+  renderPageShowCars(filteredShowCars.length);
+}
+
+const updateItemsShowCars = (value) => {
+  if (value === "all") {
+    itemsPerShowCars = filteredShowCars.length;
+  } else {
+    itemsPerShowCars = parseInt(value, 10);
+  }
+
+  currentShowCars = 1;
+  renderShowCars(filteredShowCars);
+  renderPageShowCars(filteredShowCars.length);
+}
+
+const toggleCarsStatus = (codeId, isActive) => {
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+  google.script.run.withSuccessHandler(function(res) {
+    $.LoadingOverlay("hide");
+    createToast(`✅ สถานะรถ ${isActive ? 'เปิดใช้งาน' : 'ระงับการใช้งาน'} สำเร็จ`, 1);
+    insertShowCars();
+  }).setCarsStatus(codeId, isActive);
+}
+
+document.addEventListener('DOMContentLoaded', (ev) => {
+  let input = document.querySelector('input[id="regisImgShowCars"]');
+  input.addEventListener('change', (ev) => {
+      if (input.files[0].type.indexOf("image/") > -1) {
+        let img = document.getElementById('regisImgShowCarsPreview');
+        img.src = window.URL.createObjectURL(input.files[0]);
+      }
+  });
+});
+
+const submitShowCars = (obj) => {
+  event.preventDefault();
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+
+  const dataShowCarsKey = $('#dataShowCarsKey').val();
+  const dataShowCars1 = $('#dataShowCars1').val();
+  const dataShowCars2 = $('#dataShowCars2').val();
+  const dataShowCars3 = $('#dataShowCars3').val();
+  const dataShowCars4 = $('#dataShowCars4').val();
+  const dataShowCars5 = $('#dataShowCars5').val();
+  const dataShowCars6 = $('#dataShowCars6').val();
+  const regisImgShowCars = $('#regisImgShowCars').val();
+
+  if (!dataShowCars1 || !dataShowCars2 || !dataShowCars3 || !dataShowCars4 || !dataShowCars5 || !dataShowCars6 || (dataShowCarsKey === "" && !regisImgShowCars)) {
+    createToast("⚠️ กรุณากรอกข้อมูลให้ครบถ้วน", 3);
+    $.LoadingOverlay("hide");
+    return;
+  }
+
+  if (!dataShowCarsKey) {
+    google.script.run.withSuccessHandler(function(res) {
+      $.LoadingOverlay("hide");
+      closeDataShowCars();
+      createToast("✅ บันทึกข้อมูลสำเร็จ", 1);
+    }).addShowCars(obj);
+  } else {
+    google.script.run.withSuccessHandler(function(res) {
+      $.LoadingOverlay("hide");
+      closeDataShowCars();
+      createToast("✅ แก้ไขข้อมูลสำเร็จ", 1);
+    }).updateShowCars(obj);
+  }
+};
+
+const editShowCars = (codeId) => {
+  const rowIndex = dataShowCars.find(row => row[0] === codeId);
+  if (rowIndex) {
+    const [day1, month1, year1] = rowIndex[5].split('/');
+    const formattedDate1 = `${year1}-${month1.padStart(2, '0')}-${day1.padStart(2, '0')}`;
+    const [day2, month2, year2] = rowIndex[6].split('/');
+    const formattedDate2 = `${year2}-${month2.padStart(2, '0')}-${day2.padStart(2, '0')}`;
+    
+    $('#ShowCarsModal').modal('show');
+    $('#dataShowCarsKey').val(rowIndex[0]);
+    $('#dataShowCars1').val(rowIndex[1]);
+    $('#dataShowCars2').val(rowIndex[2]);
+    $('#dataShowCars3').val(rowIndex[3]);
+    $('#dataShowCars4').val(rowIndex[4]);
+    $('#dataShowCars5').val(formattedDate1);
+    $('#dataShowCars6').val(formattedDate2);
+    $('#regisImgShowCarsPreview').attr('src', rowIndex[8]);
+  }
+};
+
+const delShowCars = (codeID) => {
+  let rowIndex = dataShowCars.find(row => row[0] === codeID);
+  if (rowIndex) {
+    $('#confirmBtnDel').off('click').on('click', function() {
+      $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+      $('#DelDataModal').modal('hide');
+      google.script.run.withSuccessHandler(function() {
+        rowIndex = dataShowCars.filter(row => row[0] !== codeID);
+        $.LoadingOverlay("hide");
+        insertShowCars();
+        createToast("⛔ ลบข้อมูลสำเร็จ", 0);
+      }).delDataShowCars(codeID);
+    });
+    $('#xDelconfirmData').off('click').on('click', function() {
+      $('#DelDataModal').modal('hide');
+    });
+    $('#DelDataModal').modal('show');
+  }
+}
+
+const closeDataShowCars = () => {
+  insertShowCars();
+  $('#formShowCars')[0].reset();
+  $('#regisImgShowCarsPreview').attr('src', 'https://img2.pic.in.th/pic/vsvds.png');
+  $('#ShowCarsModal').modal('hide');
+  createToast("🔄 ล้างค่าในฟอร์มเรียบร้อยแล้ว", 0);
+}
+</script>
