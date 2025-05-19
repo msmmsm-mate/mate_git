@@ -1,0 +1,40 @@
+<div class="sidebar position-fixed top-0 bottom-0 bg-white border-end shadow">
+  <div class="d-flex align-items-center p-3">
+    <a role="button" class="text-gradient sidebar-logo text-uppercase fw-bold text-decoration-none text-indigo fs-4" id="textSystem"></a>
+    <i class="sidebar-toggle ri-arrow-right-circle-fill set-icons-menu ms-auto fs-5 d-none d-md-block" id="onsideManu"></i>
+  </div>
+  <ul class="sidebar-menu p-3 m-0 mb-0">
+    <li class="sidebar-menu-item active-home" id="manuLi1"><a role="button" onclick="changePage(1)"><i class="ri-home-8-line sidebar-menu-item-icon"></i> หน้าหลัก</a></li>
+    <li class="sidebar-menu-divider mt-3 mb-1 text-uppercase">จัดการข้อมูลหลัก</li>
+    <li class="sidebar-menu-item active-setting" id="manuLi2"><a role="button" onclick="changePage(2)"><i class="ri-car-line sidebar-menu-item-icon"></i> ตารางใช้รถ</a></li>
+    <li class="sidebar-menu-item active-setting" id="manuLi3"><a role="button" onclick="changePage(3)"><i class="ri-presentation-line sidebar-menu-item-icon"></i> จัดการข้อมูลรถ</a></li>
+    <li class="sidebar-menu-item active-setting" id="manuLi4"><a role="button" onclick="changePage(4)"><i class="ri-file-chart-line sidebar-menu-item-icon"></i> สรุปการใช้รถ</a></li>
+
+    <li class="sidebar-menu-divider mt-3 mb-1 text-uppercase">USER</li>
+    <li class="sidebar-menu-item has-dropdown" id="manuLi5">
+      <a role="button"><i class="ri-user-follow-line sidebar-menu-item-icon"></i>ผู้ใช้งานระบบ<i class="ri-arrow-down-s-line sidebar-menu-item-accordion ms-auto"></i></a>
+        <ul class="sidebar-dropdown-menu">
+          <li class="sidebar-dropdown-menu-item" style="list-style-type: none;" ><a href="#" role="button" onclick="changePage(5)"><i class="ri-arrow-drop-right-fill"></i>&nbsp;ประวัติผู้ใช้งาน</a></li>
+          <li class="sidebar-dropdown-menu-item" style="list-style-type: none;" id="manuLi6"><a href="#" role="button" onclick="changePage(6)"><i class="ri-arrow-drop-right-fill"></i>&nbsp;ผู้ใช้งานระบบ</a></li>
+        </ul>
+    </li>
+
+    <li class="sidebar-menu-divider mt-3 mb-1 text-uppercase">SETTING</li>
+      <li class="sidebar-menu-item has-dropdown" id="manuLi7">
+        <a role="button"><i class="ri-settings-5-line sidebar-menu-item-icon"></i>ตั้งค่าระบบ<i class="ri-arrow-down-s-line sidebar-menu-item-accordion ms-auto"></i></a>
+          <ul class="sidebar-dropdown-menu">
+            <li class="sidebar-dropdown-menu-item" style="list-style-type: none;"><a href="#" role="button" onclick="changePage(7)"><i class="ri-arrow-drop-right-fill"></i>&nbsp;ตั้งค่าระบบ</a></li>
+            <li class="sidebar-dropdown-menu-item has-dropdown" style="list-style-type: none;"><a href="#" role="button"><i class="ri-arrow-drop-right-fill"></i>&nbsp;ตั้งค่าอื่น ๆ<i class="ri-arrow-down-s-line sidebar-menu-item-accordion ms-auto"></i></a>
+              <ul class="sidebar-dropdown-menu">
+                <li class="sidebar-dropdown-menu-item" style="list-style-type: none;"><a href="#" role="button" onclick="loadTodos('Department')"><i class="ri-arrow-right-s-fill"></i> ตั้งค่าแผนก</a></li>
+                <li class="sidebar-dropdown-menu-item" style="list-style-type: none;"><a href="#" role="button" onclick="loadTodos('Group')"><i class="ri-arrow-right-s-fill"></i> ตั้งค่าฝ่าย</a></li>
+                <li class="sidebar-dropdown-menu-item" style="list-style-type: none;"><a href="#" role="button" onclick="loadTodos('ObjectiveType')"><i class="ri-arrow-right-s-fill"></i> ตั้งค่าวัตถุประสงค์</a></li>
+                <li class="sidebar-dropdown-menu-item" style="list-style-type: none;"><a href="#" role="button" onclick="loadTodos('TypeCars')"><i class="ri-arrow-right-s-fill"></i> ตั้งค่าประเภทรถ</a></li>
+                <li class="sidebar-dropdown-menu-item" style="list-style-type: none;"><a href="#" role="button" onclick="loadTodos('ClassCars')"><i class="ri-arrow-right-s-fill"></i> ตั้งค่าสถานะรถ</a></li>
+              </ul>
+            </li>
+          </ul>
+      </li>
+    <li class="sidebar-menu-item active-close"><a role="button" data-bs-target="#logoutModal" data-bs-toggle="modal"><i class="ri-logout-box-line sidebar-menu-item-icon"></i> ออกจากระบบ</a></li>
+  </ul>
+</div>
