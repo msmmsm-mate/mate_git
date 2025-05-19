@@ -1,0 +1,434 @@
+<div class="row g-3 mt-3">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-header bg-white rounded-top-4 border-bottom py-3">
+        <div class="row align-items-center g-2">
+          <div class="col-12 col-md-4">
+            <h6 class="mb-0">🚗 สรุปการใช้รถเช่า</h6>
+          </div>
+          <div class="col-12 col-md-8 d-flex flex-wrap justify-content-md-end gap-2">
+            <input type="date" id="searreportCars2" class="form-control" oninput="filterreportCars()" style="max-width: 100%; min-width: 160px;">
+            <input type="date" id="searreportCars3" class="form-control" oninput="filterreportCars()" style="max-width: 100%; min-width: 160px;">
+            <input type="search" id="searreportCars1" class="form-control" placeholder="🔍 ค้นหาข้อมูล..." oninput="filterreportCars()" style="max-width: 100%; min-width: 180px;">
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered align-middle">
+            <thead class="table-light text-center">
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">ชื่อผู้ขอใช้</th>
+                <th scope="col">ประเภทรถที่เช่า</th>
+                <th scope="col">ข้อมูลผู้เช่ารถ</th>
+                <th scope="col">วันที่</th>
+                <th scope="col">ส่งรถ</th>
+                <th scope="col">ใบใช้รถ</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody id="tableReportCars" class="text-center"></tbody>
+          </table>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12 col-md-6 mb-2 mb-md-0 d-flex align-items-center" id="paginationRPCarsInfo"></div>
+          <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center">
+            <div id="paginationRPCars" class="pagination mb-0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let reportCars = [];
+let findreportCars = [];
+let currentreportCars = 1;
+let itemsPerreportCars = 10;
+
+const insertReportCars = () => {
+  google.script.run.withSuccessHandler((data) => {
+    const userRole1 = localStorage.getItem('fullname') || '';
+    const userRole2 = localStorage.getItem('level') || '';
+
+    reportCars = data.filter(row => {
+      if (userRole2 === 'SuperAdmin' || userRole2 === 'Admin') return true;
+      return row[4] === userRole1 || row[14] === userRole1; 
+    });
+
+    findreportCars = reportCars;
+    renderreportCars(reportCars);
+    renderPagereportCars(reportCars.length);
+    countsReportCars(reportCars);
+    filterreportCars();
+  }).getDataCar();
+}
+
+const renderreportCars = (res) => {
+  const table = document.getElementById('tableReportCars');
+  table.innerHTML = '';
+
+  res.sort((a, b) => parseDate(b[15]) - parseDate(a[15]));
+
+  const userRole1 = localStorage.getItem('fullname') || '';
+  const userRole2 = localStorage.getItem('level') || '';
+
+  const startIndex = (currentreportCars - 1) * itemsPerreportCars;
+  const endIndex = startIndex + itemsPerreportCars;
+  const report = res.slice(startIndex, endIndex);
+
+  const startRow = startIndex + 1;
+  const endRow = startIndex + report.length;
+  const totalRows = res.length;
+
+  document.getElementById('paginationRPCarsInfo').innerText = `แสดง ${startRow} ถึง ${endRow} จาก ${totalRows} แถว`;
+
+  if (report.length === 0) {
+    const row = table.insertRow();
+    row.innerHTML = `<td colspan='9' class='fw-bold text-danger text-center p-4'><i class='fa-solid fa-circle-info text-danger'></i> ไม่พบข้อมูล! 😓</td>`;
+    return;
+  }
+
+  report.forEach((rowIndex, index) => {
+    let status = rowIndex[1];
+    let pdfLink = rowIndex[27];
+    let pdfButton;
+    let actionButton;
+
+    let mileGo = parseFloat(rowIndex[20]) || 0;
+    let mileReturn = parseFloat(rowIndex[21]) || 0;
+    let totalDistance = mileReturn - mileGo > 0 ? (mileReturn - mileGo).toFixed(2) + ' กม.' : 'N/A';
+
+    if (userRole2 === 'SuperAdmin' || userRole2 === 'Admin' || userRole1 === rowIndex[4]) {
+      if (pdfLink) {
+        pdfButton = `<a href="${pdfLink}" target="_blank" class="btn btn-sm me-2 set-button"><i class="fa-solid fa-download"></i> ดาวน์โหลด</a>`;
+      } else {
+        pdfButton = `<button class="btn btn-sm me-2 del-button">❌ ไฟล์</button>`;
+      }
+    } else {
+      pdfButton = `<button class="btn btn-sm me-2 del-button" onclick="createToast('⚠️ คุณไม่มีสิทธิ์ในการเข้าถึงรายการนี้', 3)">❌ สิทธิ์</button>`;
+    }
+
+    if (status === 'อนุมัติ') {
+      if (!rowIndex[20]) {
+        actionButton = `<button class="btn btn-sm edit-button" onclick="openSendCarModal('start', '${rowIndex[0]}')">🚗 ออกรถ</button>`;
+      } else if (!rowIndex[21]) {
+        actionButton = `<button class="btn btn-sm del-button" onclick="openSendCarModal('return', '${rowIndex[0]}')">🚘 คืนรถ</button>`;
+      } else {
+        actionButton = `<button class="btn btn-sm upload-button" onclick="createToast('✅ คืนเรียบร้อย', 2)">✅ คืนเรียบร้อย</button>`;
+      }
+    } else {
+      actionButton = `<button class="btn btn-sm del-button" onclick="createToast('❌ ไม่พบข้อมูล', 0)">❌ ข้อมูล</button>`;
+    }
+
+    switch (status) {
+      case "รอตรวจสอบ":
+        status = `<span style="color: var(--box1);font-size: 14px;">⌛ ${rowIndex[1]}</span>`;
+        break;
+      case "อนุมัติ":
+        status = `<span style="color: var(--box2);font-size: 14px;">✅ ${rowIndex[1]}</span>`;
+        break;
+      case "ยกเลิก":
+        status = `<span style="color: var(--box4);font-size: 14px;">❌ ${rowIndex[1]}</span>`;
+        break;
+      default:
+        status = `<span style="color: var(--box4);font-size: 14px;">❌ ${rowIndex[1]}</span>`;
+    }
+
+    let user = dataUsers.find(user => user[0] === rowIndex[3]);
+    let userImage = user ? user[7] : 'https://e1.pngegg.com/pngimages/98/854/png-clipart-voiture-location-de-voitures-location-logo-tour-operateur-tourisme-vacances-client.png';
+
+    let car = dataShowCars.find(car => car[0] === rowIndex[11]);
+    let carImage = car ? car[8] : 'https://e1.pngegg.com/pngimages/98/854/png-clipart-voiture-location-de-voitures-location-logo-tour-operateur-tourisme-vacances-client.png';
+
+    var row = table.insertRow();
+    row.innerHTML = `
+      <td class="text-center"><span style="font-size: 14px;">${startIndex + index + 1}</span></td>
+      <td>
+        <div style="display: flex; align-items: center;">
+          <img src="${userImage}" alt="ImageUsers" width="30px" style="margin-right: 10px;">
+          <div style="font-size: 14px;">
+            <span>🙋ชื่อ: ${rowIndex[4]}</span><br>
+            <span>ฝ่าย: ${rowIndex[6]}</span><br>
+            <span>หน่วยงาน: ${rowIndex[5]}</span><br>
+            <span>วันที่แจ้ง: ${rowIndex[2]}</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="display: flex; align-items: center;">
+          <img src="${carImage}" alt="ImageUsers" width="50px" style="margin-right: 10px;">
+          <div style="font-size: 14px;">
+            <span>${status}</span><br>
+            <span>KeyCar: ${rowIndex[11]}</span><br>
+            <span>ประเภท: ${rowIndex[12]}</span><br>
+            <span>เลขทะเบียนรถ: ${rowIndex[13]}</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span style="font-size: 14px;">👨‍💼ชื่อ-สกุล: ${rowIndex[10]}</span><br>
+        <span style="font-size: 14px;">เลขบัตรประชาชน: ${rowIndex[8]}</span><br>
+        <span style="font-size: 14px;">เลขที่ใบขับขี่: ${rowIndex[9]}</span><br>
+        <span style="font-size: 14px;">🛣️ระยะทาง ${totalDistance}</span>
+      </td>
+      <td>
+        <span style="font-size: 14px;">🗓️วันที่เริ่ม: ${rowIndex[15]}</span><br>
+        <span style="font-size: 14px;">🗓️วันที่สิ้นสุด: ${rowIndex[16]}</span><br>
+        <span style="font-size: 14px;">👨‍💼จำนวน: ${rowIndex[19]} คน</span>
+      <td class="text-center">${actionButton}</td>
+      <td class="text-center">${pdfButton}</td>
+      <td class="text-center"><button class="btn btn-sm upload-button" onclick="uploadFileCars('${rowIndex[0]}');"> อัปโหลด</button></td>
+    `;
+  });
+}
+
+const renderPagereportCars = (totalItems) => {
+  const totalPages = Math.ceil(totalItems / itemsPerreportCars);
+  const paginationContainer = document.getElementById('paginationRPCars');
+  paginationContainer.innerHTML = '';
+  if (totalPages > 1) {
+    const createPageButton = (text, page, isDisabled = false, isActive = false) => {
+      const li = document.createElement('li');
+      li.className = `page-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}`;
+      const button = document.createElement('button');
+      button.className = 'page-link';
+      button.innerText = text;
+      button.onclick = () => {
+        if (!isDisabled) {
+          currentreportCars = page;
+          renderreportCars(reportCars);
+          renderPagereportCars(totalItems);
+        }
+      };
+      li.appendChild(button);
+      return li;
+    };
+    paginationContainer.appendChild(createPageButton('ย้อนกลับ', currentreportCars - 1, currentreportCars === 1));
+
+    if (currentreportCars > 2) {
+      paginationContainer.appendChild(createPageButton(1, 1, false, currentreportCars === 1));
+      if (currentreportCars > 3) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+    }
+    paginationContainer.appendChild(createPageButton(currentreportCars, currentreportCars, false, true));
+
+    if (currentreportCars < totalPages - 1) {
+      if (currentreportCars < totalPages - 2) {
+        const ellipsis = document.createElement('li');
+        ellipsis.className = 'page-item disabled';
+        ellipsis.innerHTML = '<span class="page-link">...</span>';
+        paginationContainer.appendChild(ellipsis);
+      }
+      paginationContainer.appendChild(createPageButton(totalPages, totalPages, false, currentreportCars === totalPages));
+    }
+    paginationContainer.appendChild(createPageButton('ถัดไป', currentreportCars + 1, currentreportCars === totalPages));
+  }
+}
+
+const filterreportCars = () => {
+  const query = document.getElementById('searreportCars1').value.toLowerCase();
+  const startDate = document.getElementById('searreportCars2').value;
+  const endDate = document.getElementById('searreportCars3').value;
+  if (!startDate || !endDate) return;
+  const userRole1 = localStorage.getItem('fullname') || '';
+  const userRole2 = localStorage.getItem('level') || '';
+
+  findreportCars = reportCars.filter(row => {
+    const rowStartDate = row[15];
+    const rowEndDate = row[16];
+
+    const isWithinDateRange = (!startDate || rowStartDate >= startDate) && 
+                              (!endDate || rowEndDate <= endDate);
+    const matchesQuery = row.some(column => column.toLowerCase().includes(query));
+
+    if (userRole2 !== 'SuperAdmin' && userRole2 !== 'Admin') {
+      if (row[4] !== userRole1 && row[14] !== userRole1) return false;
+    }
+
+    return isWithinDateRange && matchesQuery;
+  });
+
+  currentreportCars = 1;
+  renderreportCars(findreportCars);
+  renderPagereportCars(findreportCars.length);
+  countsReportCars(findreportCars);
+}
+
+const countsReportCars = (data) => {
+  const statusCounts = data.reduce((acc, row) => {
+    const status = row[1];
+    if (!acc[status]) {
+      acc[status] = 0;
+    }
+    acc[status]++;
+    return acc;
+  }, {});
+
+  const totalCount = data.length;
+
+  const summaryContainer = document.getElementById('carsSummary');
+  summaryContainer.innerHTML = `
+    <p style="color: var(--box1);font-size: 14px;">⌛ รอตรวจสอบ: ${statusCounts['รอตรวจสอบ'] || 0} รายการ ❌ ยกเลิก: ${statusCounts['ยกเลิก'] || 0} ✅ อนุมัติ: ${statusCounts['อนุมัติ'] || 0} รายการ 📊 รวมทั้งหมด: ${totalCount} รายการ</p>
+  `;
+}
+
+let currentAction = '';
+let selectedCarID = '';
+
+const openSendCarModal = (action, carID) => {
+  const userRole = localStorage.getItem('level') || '';
+  if (!['SuperAdmin', 'Admin', 'Driver'].includes(userRole)) {
+    createToast("⚠️ คุณไม่มีสิทธิ์ในการเข้าถึงรายการนี้", 3);
+    return;
+  }
+  currentAction = action;
+  selectedCarID = carID;
+  document.getElementById('startMileSection').style.display = 'none';
+  document.getElementById('returnMileSection').style.display = 'none';
+  document.getElementById('fuelSection').style.display = 'none';
+  if (action === 'start') {
+    document.getElementById('startMileSection').style.display = 'block';
+  } else if (action === 'return') {
+    document.getElementById('returnMileSection').style.display = 'block';
+    document.getElementById('fuelSection').style.display = 'block';
+  }
+  $('#sendCarModal').modal('show');
+};
+
+const submitSendCars = () => {
+  const startMile = document.getElementById('sendCarstartMile').value;
+  const returnMile = document.getElementById('sendCarreturnMile').value;
+  const fuelAmount = document.getElementById('sendCarfuelAmount').value;
+  if (currentAction === 'start' && startMile) {
+    $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+    google.script.run.withSuccessHandler(() => {
+      $.LoadingOverlay("hide");
+      insertReportCars();
+      closeSendCars();
+      createToast("✅ ออกรถเรียบร้อย", 1);
+    }).updateSendCarData(selectedCarID, startMile, null, null);
+  }
+  else if (currentAction === 'return' && returnMile && fuelAmount) {
+    $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+    google.script.run.withSuccessHandler(() => {
+      $.LoadingOverlay("hide");
+      insertReportCars();
+      closeSendCars();
+      createToast("✅ คืนรถเรียบร้อย", 1);
+    }).updateSendCarData(selectedCarID, null, returnMile, fuelAmount);
+  }
+  $('#sendCarModal').modal('hide');
+};
+
+const closeSendCars = () => {
+  document.getElementById('sendCarstartMile').value = '';
+  document.getElementById('sendCarreturnMile').value = '';
+  document.getElementById('sendCarfuelAmount').value = '';
+  createToast("🔄 ล้างค่าในฟอร์มและค่าที่เลือกเรียบร้อยแล้ว", 0);
+}
+
+const uploadFileCars = (codeID) => {
+  const userRole = localStorage.getItem('level') || '';
+  if (!['SuperAdmin', 'Admin', 'Driver'].includes(userRole)) {
+    createToast("⚠️ คุณไม่มีสิทธิ์ในการเข้าถึงรายการนี้", 3);
+    return;
+  }
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.pdf';
+  fileInput.onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64File = e.target.result.split(',')[1];
+        const obj = {
+          codeID: codeID,
+          repairFile: base64File,
+          fileName: file.name,
+        };
+        $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+        google.script.run.withSuccessHandler(() => {
+          $.LoadingOverlay("hide");
+          insertReportCars();
+          createToast("✅ ไฟล์อัปโหลดสำเร็จ", 1);
+        }).adduploadFileCars(obj);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  fileInput.click(); 
+};
+
+const insertChartCars = () => {
+  let monthCounts = new Map();
+  const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+  const colors = ['#3c8cf3', '#05be8a', '#745af2', '#ef5350'];
+  google.script.run.withSuccessHandler((data) => {
+    data.forEach((item) => {
+      if (item[15]) {
+        const date = new Date(item[15]);
+        const month = date.getMonth();
+        const monthName = monthNames[month];
+        if (monthCounts.has(monthName)) {
+          monthCounts.set(monthName, monthCounts.get(monthName) + 1);
+        } else {
+          monthCounts.set(monthName, 1);
+        }
+      }
+    });
+    let seriesData = monthNames.map(month => monthCounts.get(month) || 0);
+    var options = {
+      series: [{
+        name: 'จำนวน',
+        data: seriesData
+      }],
+      chart: {
+        height: 350,
+        type: 'area'
+      },
+      colors: colors,
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      xaxis: {
+        type: 'text',
+        categories: monthNames,
+        labels: {
+          style: {
+            fontSize: '12px',
+            fontFamily: 'Prompt, sans-serif'
+          }
+        }
+      },
+      tooltip: {
+        x: {
+          format: 'dd/MM/yy HH:mm'
+        }
+      },
+      fill: {
+        colors: colors,
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.7,
+          opacityTo: 0.9,
+          stops: [0, 90, 100]
+        }
+      }
+    };
+    const chart = new ApexCharts(document.querySelector("#chartCars"), options);
+    chart.render();
+  }).getDataCar();
+}
+</script>
