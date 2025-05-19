@@ -1,0 +1,446 @@
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-geodesy@2.1.0/leaflet-geodesy.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- SweetAlret -->
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.4/signature_pad.umd.min.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+
+<!-- dataTables -->
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.20.0/dist/bootstrap-table.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-table/dist/locale/bootstrap-table-th-TH.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+<script>
+  var signaturePadUser = new SignaturePad(document.getElementById('signatureCanvas'));
+  var clearButtonA = document.getElementById('clearButtonA');
+  var colorPickerA = document.getElementById('colorPickerA');
+  var currentColorA = '#000000'; 
+    clearButtonA.addEventListener('click', function () {
+      signaturePadUser.clear();  
+    });
+    colorPickerA.addEventListener('input', function () {
+      currentColorA = colorPickerA.value;
+      signaturePadUser.penColor = currentColorA;
+});
+
+$(document).ready(function() {
+  $('.sidebar').addClass('collapsed');
+  $('.sidebar-dropdown-menu').slideUp('fast');
+
+  $('.sidebar-menu-item.has-dropdown > a, .sidebar-dropdown-menu-item.has-dropdown > a').click(function(e) {
+    e.preventDefault();
+    $('.sidebar-dropdown-menu').css('overflow-y', 'hidden');
+    if(!($(this).parent().hasClass('focused'))) {
+      $(this).parent().parent().find('.sidebar-dropdown-menu').slideUp('fast');
+      $(this).parent().parent().find('.has-dropdown').removeClass('focused');
+    }
+    $(this).next().slideToggle('fast');
+    $(this).parent().toggleClass('focused');
+  });
+
+  $('.sidebar-menu-item > a, .sidebar-dropdown-menu-item > a').click(function(e) {
+    if(!$(this).parent().hasClass('has-dropdown')) {
+      $(this).closest('.sidebar-dropdown-menu').slideUp('fast');
+      $(this).closest('.has-dropdown').removeClass('focused');
+    }
+  });
+
+  $('.sidebar-toggle').click(function() {
+    $('.sidebar').toggleClass('collapsed');
+
+    $('.sidebar.collapsed').mouseleave(function() {
+      $('.sidebar-dropdown-menu').slideUp('fast');
+      $('.sidebar-menu-item.has-dropdown, .sidebar-dropdown-menu-item.has-dropdown').removeClass('focused');
+    });
+  });
+
+  $('.sidebar-overlay').click(function() {
+    $('.sidebar').addClass('collapsed');
+    $('.sidebar-dropdown-menu').slideUp('fast');
+    $('.sidebar-menu-item.has-dropdown, .sidebar-dropdown-menu-item.has-dropdown').removeClass('focused');
+  });
+
+  if(window.innerWidth < 768) {
+    $('.sidebar').addClass('collapsed');
+  }
+});
+
+function reLoad() {
+  google.script.run.withSuccessHandler(function(url){
+    window.open(url,'_top');
+  }).getURL();
+}
+
+window.onload = () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('searreportCars2').value = today;
+  document.getElementById('searreportCars3').value = today;
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  google.script.run.withSuccessHandler(data => {
+    data.forEach((value, index) => {
+      $(`#setData${index + 1}`).val(value);
+    });
+      $("#logoSystem").attr("src", data[5]);
+      $("#textSystem").text(data[7]);
+      $("#nameSystem").text(data[6]);
+      $("#logoLogin").attr("src", data[5]);
+      $("#textLogin").text(data[6]);
+  }).getSet();
+});
+
+const addSetting = () => {
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+  let data = {};
+  for (let i = 1; i <= 8; i++) {
+    data[`set${i}`] = document.getElementById(`setData${i}`).value;
+  }
+  google.script.run.withSuccessHandler(response => {
+    $("#xModalsetting").click();
+    google.script.run.withSuccessHandler(data => {
+      $("#logoSystem").attr("src", data[5]);
+      $("#textSystem").text(data[7]);
+      $("#nameSystem").text(data[6]);
+      $("#logoLogin").attr("src", data[5]);
+      $("#textLogin").text(data[6]);
+    }).getSet();
+    $.LoadingOverlay("hide");
+    createToast("🛠️ บันทึกการตั้งค่าสำเร็จ", 1);
+  }).settingGS(data);
+}
+
+const setDisPlayMenu = (status, menuItems) => {
+  const allMenuItems = Object.keys(menuItems);
+  allMenuItems.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.style.display = "none";
+    }
+  });
+  for (const item in menuItems) {
+    if (menuItems[item][status]) {
+      const element = document.getElementById(item);
+      if (element) {
+        element.style.display = "block";
+      }
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  if (isLoggedIn !== 'true') {
+    localStorage.removeItem('uiduser');
+    localStorage.removeItem('username');
+    localStorage.removeItem('password');
+    localStorage.removeItem('fullname');
+    localStorage.removeItem('department');
+    localStorage.removeItem('group');
+    localStorage.removeItem('level');
+    localStorage.removeItem('imgUser');
+    localStorage.removeItem('sigUser');
+    localStorage.removeItem('status');
+    localStorage.removeItem('isLoggedIn');
+  } else {
+    let datauser = {
+    uiduser: localStorage.getItem('uiduser'),
+    username: localStorage.getItem('username'),
+    password: localStorage.getItem('password'),
+    fullname: localStorage.getItem('fullname'),
+    department: localStorage.getItem('department'),
+    group: localStorage.getItem('group'),
+    level: localStorage.getItem('level'),
+    imgUser: localStorage.getItem('imgUser'),
+    sigUser: localStorage.getItem('sigUser'),
+    status: localStorage.getItem('status')
+    };
+    google.script.run.withSuccessHandler(function(menuItems) {
+      setDisPlayMenu(datauser.level, menuItems);
+    }).getMenuItems();
+    loginUserSuc(datauser);
+  }
+  const storedUsername = localStorage.getItem("usernameSave");
+  const storedPassword = localStorage.getItem("passwordSave");
+  const storedChecked = localStorage.getItem("checked");
+
+  if (storedUsername) {
+    document.getElementById("loginusername").value = storedUsername;
+  }
+  if (storedPassword) {
+    document.getElementById("loginpassword").value = storedPassword;
+  }
+  if (storedChecked === "checked") {
+    document.getElementById("rememberMe").checked = true;
+  }
+  insertShowCars();
+  insertCarsTypes();
+});
+
+const getIPAddress = async () => {
+  const ipAPI = "//api.ipify.org?format=json";
+  const response = await fetch(ipAPI); 
+  const data = await response.json(); 
+  return data.ip;
+}
+
+const loginUsers = async () => {
+  event.preventDefault();
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+  const usernameCheck = $("#loginusername").val();
+  const passwordCheck = $("#loginpassword").val();
+  const rememberMe = document.getElementById("rememberMe");
+  const ipCheck = await getIPAddress();
+  const userAgent = navigator.userAgent;
+  google.script.run.withSuccessHandler(function(datauser) {
+    if (typeof datauser === 'object' && datauser !== null) {
+      createToast("🔓 เข้าสู่ระบบสำเร็จ " + datauser.fullname, 1);
+      localStorage.setItem('uiduser', datauser.uiduser);
+      localStorage.setItem('username', datauser.username);
+      localStorage.setItem('password', datauser.password);
+      localStorage.setItem('fullname', datauser.fullname);
+      localStorage.setItem('department', datauser.department);
+      localStorage.setItem('group', datauser.group);
+      localStorage.setItem('level', datauser.level);
+      localStorage.setItem('imgUser', datauser.imgUser);
+      localStorage.setItem('sigUser', datauser.sigUser);
+      localStorage.setItem('status', datauser.status);
+      localStorage.setItem('isLoggedIn', 'true'); 
+      if (rememberMe.checked) {
+        localStorage.setItem('usernameSave', usernameCheck);
+        localStorage.setItem('passwordSave', passwordCheck);
+        localStorage.setItem('checked', 'checked');
+      } else {
+        localStorage.removeItem('usernameSave');
+        localStorage.removeItem('passwordSave');
+        localStorage.removeItem('checked'); 
+      }
+      loginUserSuc(datauser);
+      google.script.run.withSuccessHandler(function(menuItems) {
+        setDisPlayMenu(datauser.level, menuItems);
+      }).getMenuItems(); 
+    } else {
+      $.LoadingOverlay("hide");
+      createToast("❌ ไม่พบข้อมูลผู้ใช้งาน กรุณาตรวจสอบอีกครั้ง", 3);
+      $("#pageformLogin").show();
+      $("#dashboardPage").hide();
+    }
+  }).checkUsers(usernameCheck, passwordCheck, ipCheck, userAgent);
+}
+
+const loginUserSuc = (datauser) => {
+  $.LoadingOverlay("hide");
+  $("#pageformLogin").hide();
+  $("#dashboardPage").show();
+  $('#user-show0').html(datauser.uiduser);
+  $('#user-show1').html(datauser.fullname);
+  $('#user-show2').html(datauser.department);
+  $('#user-show3').html(datauser.level);
+  $('#user-show4').html(datauser.sigUser);
+  $('#user-show5').html(datauser.group);
+  $('#picadmin1').attr('src', datauser.imgUser);
+  $('#picadmin2').attr('src', datauser.imgUser);
+  $('#picadmin3').attr('src', datauser.sigUser);
+  $('#regictorNewPreview').attr('src', datauser.imgUser);
+  changePage(1)
+  reviewdivprofile();
+  insertDataUsers();
+  insertChartCars();
+  insertShowCars();
+  insertCarsTypes();
+}
+
+const logoutUsers = async () => {
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+  if (localStorage.getItem('isLoggedIn') === 'true') {
+    const usernameGeneral = localStorage.getItem('username');
+    const ipCheck = await getIPAddress();
+    const userAgent = navigator.userAgent;
+    google.script.run.withSuccessHandler(function() {
+      $.LoadingOverlay("hide");
+      const usernameSave = localStorage.getItem('usernameSave');
+      const passwordSave = localStorage.getItem('passwordSave');
+      const checkedSave = localStorage.getItem('checked');
+      localStorage.removeItem('uiduser');
+      localStorage.removeItem('username');
+      localStorage.removeItem('password');
+      localStorage.removeItem('fullname');
+      localStorage.removeItem('department');
+      localStorage.removeItem('group');
+      localStorage.removeItem('level');
+      localStorage.removeItem('imgUser');
+      localStorage.removeItem('sigUser');
+      localStorage.removeItem('status');
+      localStorage.removeItem('isLoggedIn');
+      if (checkedSave === "checked") {
+        localStorage.setItem('usernameSave', usernameSave);
+        localStorage.setItem('passwordSave', passwordSave);
+        localStorage.setItem('checked', checkedSave);
+      }
+      $('#picadmin1').attr('src', "");
+      $('#picadmin2').attr('src', "");
+      $('#picadmin3').attr('src', "");
+      $("#dashboardPage").hide();
+      $('#pageformLogin').show();
+      createToast("🔓 ออกจากระบบสำเร็จ", 1);
+    }).checkLogoutUsers(usernameGeneral, ipCheck, userAgent);
+  //reLoad();
+  } else {
+    $.LoadingOverlay("hide");
+    createToast("❌ ไม่สามารถออกจากระบบได้", 0);
+  }
+}
+
+$(document).ready(() => {
+  updateAllDropdowns();
+});
+
+const updateAllDropdowns = () => {
+  const dropdownsConfig = [
+    { functionName: 'selectDepartment', selectIds: ['registerData1','searchUsers2'] },
+    { functionName: 'selectGroup', selectIds: ['registerData2'] },
+    { functionName: 'selectObjectiveType', selectIds: ['approveDataCars1'] },
+    { functionName: 'selectTypeCars', selectIds: ['dataShowCars1'] },
+    { functionName: 'selectClassCars', selectIds: ['carsData1'] }
+  ];
+
+  dropdownsConfig.forEach(config => {
+    updateDropdowns(config.functionName, config.selectIds);
+  });
+}
+
+const updateDropdowns = (functionName, selectIds) => {
+  google.script.run.withSuccessHandler((options) => {
+    populateSelectElements(selectIds, options);
+  })[functionName]();
+}
+
+const populateSelectElements = (selectIds, options) => {
+  selectIds.forEach(selectId => {
+    let selectElement = document.getElementById(selectId);
+    if (selectElement) {
+      selectElement.innerHTML = '';
+
+      let defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.text = "กรุณาเลือกรายการ";
+      defaultOption.selected = true;
+      selectElement.appendChild(defaultOption);
+
+      options.forEach(optionText => {
+        let option = document.createElement("option");
+        option.value = optionText;
+        option.text = optionText;
+        selectElement.appendChild(option);
+      });
+    }
+  });
+}
+
+const saveTodosSet = () => {
+  $.LoadingOverlay("show", {image: "", fontawesome: "fa fa-spinner fa-spin"});
+    google.script.run.withSuccessHandler(() => {
+    $.LoadingOverlay("hide");
+    createToast("✅ บันทึกข้อมูลสำเร็จ", 1);
+    $('#todoInput').val("");
+    $('#ModalDataSetting').modal('show');
+      loadTodos(currentSheet);
+      //updateAllDropdowns();
+  }).saveTodos({todos: todoList, sheetName: currentSheet});
+}
+
+const openimageModal = (imageSrc) => {
+  const modalImage = document.getElementById('imageModalSrc');
+  modalImage.src = imageSrc;
+  $('#imageModal').modal('show');
+}
+
+const changePage = (data) => {
+  let pageName = "";
+  switch(data) {
+    case 1:
+      pageName = "หน้าหลักของระบบ";
+      break;
+    case 2:
+      pageName = "ตารางใช้รถ";
+      break;
+    case 3:
+      pageName = "จัดการข้อมูลรถ";
+      break;
+    case 4:
+      pageName = "สรุปการใช้รถ";
+      break;
+    case 5:
+      pageName = "ประวัติการเข้าใช้งาน";
+       break;
+    case 6:
+      pageName = "ตารางข้อมูลผู้ใช้งาน";
+       break;
+    case 7:
+      pageName = "ตั้งค่าการใช้งานระบบ";
+      break;
+  }
+  $.LoadingOverlay("show", { image: "", fontawesome: "fa fa-spinner fa-spin" });
+  setTimeout(() => {
+    $.LoadingOverlay("hide");
+    for (let i = 1; i <= 7; i++) {
+      $("#page" + i).toggle(i === data);
+    }
+    createToast(`✅ คุณกำลังใช้งาน ${pageName}`, 2);
+    if (data === 1) {
+      insertCarsTypes();
+    }
+    if (data === 2) {
+      insertDataCars('รอตรวจสอบ');
+      showcalendarCars();
+      insertShowCars();
+      insertReportCars();
+    }
+    if (data === 3) {
+      insertShowCars();
+    }
+    if (data === 4) {
+      insertReportCars();
+      insertShowCars();
+    }
+    if (data === 5) {
+      insertDataRecUsers();
+    }
+    if (data === 6) {
+      insertDataUsers();
+    }
+    if (data === 7) {
+      insertsetMenu();
+    }
+  }, 500);
+}
+
+const closeWindow = () => {
+  window.close();
+}
+</script>
